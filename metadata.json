@@ -1,0 +1,5 @@
+{
+  "name": "Dashboard de Controle de PS Navais - BFLa",
+  "description": "Dashboard moderno e intuitivo para acompanhamento de Pedidos de Serviço (PS) da Base Fluvial de Ladário, com filtros temporais, KPIs de valor e produtividade, e análises por oficina e organização militar.",
+  "requestFramePermissions": []
+}
