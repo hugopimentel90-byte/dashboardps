@@ -16,10 +16,10 @@ export const KPICard: React.FC<KPICardProps> = ({ title, value, subtitle, icon, 
         {icon}
       </div>
       <div>
-        <p className="text-sm font-medium text-slate-500">{title}</p>
-        <h3 className="text-2xl font-bold text-slate-900 mt-1">{value}</h3>
+        <p className="text-[10px] md:text-sm font-medium text-slate-500">{title}</p>
+        <h3 className="text-lg md:text-2xl font-bold text-slate-900 mt-1">{value}</h3>
         {subtitle && (
-          <p className="text-xs text-slate-400 mt-1 font-medium uppercase tracking-wider">{subtitle}</p>
+          <p className="text-[8px] md:text-xs text-slate-400 mt-1 font-medium uppercase tracking-wider">{subtitle}</p>
         )}
       </div>
     </div>

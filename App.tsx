@@ -9,7 +9,7 @@ import {
   RefreshCcw, TrendingUp, DollarSign, Clock, CheckCircle2,
   AlertCircle, HardHat, FileText, Settings, UserCheck, Timer,
   Construction, Download, ArrowLeft, Mail, Send, Check, RotateCcw,
-  Loader2, Save, X, Info, Copy, HelpCircle
+  Loader2, Save, X, Info, Copy, HelpCircle, Menu, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -73,6 +73,7 @@ const App: React.FC = () => {
     oficina: 'TODAS'
   });
 
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' | 'info' } | null>(null);
 
   useEffect(() => {
@@ -318,61 +319,61 @@ const App: React.FC = () => {
   if (currentView === 'settings') {
     return (
       <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
-        <header className="bg-white border-b border-slate-200 sticky top-0 z-50 px-8 py-4 flex items-center justify-between shadow-sm">
+        <header className="bg-white border-b border-slate-200 sticky top-0 z-50 px-4 md:px-8 py-4 flex items-center justify-between shadow-sm">
           <div className="flex items-center space-x-4">
             <button onClick={() => setCurrentView('dashboard')} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500">
               <ArrowLeft size={20} />
             </button>
             <div>
-              <h1 className="text-xl font-bold tracking-tight text-slate-900 flex items-center space-x-2">
-                <Settings className="text-indigo-600" size={24} />
-                <span>Configurações do Sistema</span>
+              <h1 className="text-lg md:text-xl font-bold tracking-tight text-slate-900 flex items-center space-x-2">
+                <Settings className="text-indigo-600 hide-mobile" size={24} />
+                <span>Configurações</span>
               </h1>
-              <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Mapeamento de E-mails das Oficinas</p>
+              <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Mapeamento de E-mails</p>
             </div>
           </div>
         </header>
 
-        <main className="flex-1 p-8 max-w-4xl mx-auto w-full">
+        <main className="flex-1 p-4 md:p-8 max-w-4xl mx-auto w-full">
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center space-x-3">
-              <Info className="text-indigo-500" size={20} />
-              <p className="text-xs text-slate-500 font-medium">Configure aqui os e-mails de destino para os disparos automáticos de orçamento.</p>
+            <div className="p-4 md:p-6 border-b border-slate-100 bg-slate-50/50 flex items-center space-x-3">
+              <Info className="text-indigo-500" size={18} />
+              <p className="text-[10px] md:text-xs text-slate-500 font-medium">Configure aqui os e-mails de destino para as oficinas.</p>
             </div>
 
-            <div className="divide-y divide-slate-100 max-h-[70vh] overflow-y-auto custom-scrollbar">
+            <div className="divide-y divide-slate-100 max-h-[60vh] md:max-h-[70vh] overflow-y-auto custom-scrollbar">
               {oficinas.map((oficina) => (
-                <div key={oficina} className="p-6 flex items-center justify-between hover:bg-slate-50 transition-colors">
-                  <div className="flex-1 mr-8">
+                <div key={oficina} className="p-4 md:p-6 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-slate-50 transition-colors gap-4">
+                  <div className="flex-1 sm:mr-8">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">{oficina}</label>
                     <div className="relative group">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-500" size={16} />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-500" size={14} />
                       <input
                         type="email"
                         placeholder="Ex: responsavel@marinha.mil.br"
-                        className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                        className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                         value={workshopEmailsMap[oficina] || ''}
                         onChange={(e) => updateWorkshopEmail(oficina, e.target.value)}
                       />
                     </div>
                   </div>
-                  <div className="text-right shrink-0">
-                    <div className={`flex items-center space-x-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase ${workshopEmailsMap[oficina] ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-amber-50 text-amber-600 border border-amber-100'}`}>
-                      {workshopEmailsMap[oficina] ? <Check size={12} /> : <AlertCircle size={12} />}
-                      <span>{workshopEmailsMap[oficina] ? 'Personalizado' : 'Usando Padrão'}</span>
+                  <div className="shrink-0">
+                    <div className={`inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-[9px] font-bold uppercase ${workshopEmailsMap[oficina] ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-amber-50 text-amber-600 border border-amber-100'}`}>
+                      {workshopEmailsMap[oficina] ? <Check size={10} /> : <AlertCircle size={10} />}
+                      <span>{workshopEmailsMap[oficina] ? 'Personalizado' : 'Padrão'}</span>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-            <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end">
+            <div className="p-4 md:p-6 bg-slate-50 border-t border-slate-100 flex justify-end">
               <button
                 onClick={handleSaveSettings}
                 disabled={isSavingSettings}
-                className="flex items-center space-x-2 bg-indigo-600 text-white px-8 py-2.5 rounded-xl text-sm font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all active:scale-95 disabled:opacity-50"
+                className="flex items-center justify-center space-x-2 bg-indigo-600 text-white px-8 py-2.5 rounded-xl text-sm font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all active:scale-95 disabled:opacity-50 w-full sm:w-auto"
               >
                 {isSavingSettings ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                <span>{isSavingSettings ? 'Salvando...' : 'Salvar Configurações'}</span>
+                <span>{isSavingSettings ? 'Salvando...' : 'Salvar'}</span>
               </button>
             </div>
           </div>
@@ -434,26 +435,27 @@ const App: React.FC = () => {
           </div>
         )}
 
-        <header className="bg-white border-b border-slate-200 sticky top-0 z-50 px-8 py-4 flex items-center justify-between shadow-sm">
-          <div className="flex items-center space-x-4">
-            <button onClick={() => setCurrentView('dashboard')} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500">
-              <ArrowLeft size={20} />
-            </button>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight text-slate-900 flex items-center space-x-2">
-                <DollarSign className="text-amber-500" size={24} />
-                <span>Gestão de Orçamentos (A Orçar)</span>
-              </h1>
-              <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Base Fluvial de Ladário</p>
+        <header className="bg-white border-b border-slate-200 sticky top-0 z-50 px-4 md:px-8 py-4 flex flex-col sm:flex-row items-center justify-between shadow-sm gap-4">
+          <div className="flex items-center justify-between w-full sm:w-auto">
+            <div className="flex items-center space-x-4">
+              <button onClick={() => setCurrentView('dashboard')} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500">
+                <ArrowLeft size={20} />
+              </button>
+              <div>
+                <h1 className="text-lg md:text-xl font-bold tracking-tight text-slate-900 flex items-center space-x-2">
+                  <DollarSign className="text-amber-500 hide-mobile" size={24} />
+                  <span>A Orçar</span>
+                </h1>
+                <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Base Ladário</p>
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100 shadow-sm">
-              <Filter size={14} className="text-slate-400" />
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Oficina:</span>
+          <div className="flex items-center space-x-3 w-full sm:w-auto justify-end">
+            <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100 shadow-sm flex-1 sm:flex-none">
+              <Filter size={12} className="text-slate-400" />
               <select
-                className="bg-transparent text-xs font-bold text-slate-700 outline-none cursor-pointer"
+                className="bg-transparent text-[10px] font-bold text-slate-700 outline-none cursor-pointer w-full"
                 value={orcarOficinaFilter}
                 onChange={(e) => setOrcarOficinaFilter(e.target.value)}
               >
@@ -461,16 +463,15 @@ const App: React.FC = () => {
                 {oficinas.map(o => <option key={o} value={o}>{o}</option>)}
               </select>
             </div>
-            <div className="h-6 w-px bg-slate-200"></div>
-            <div className="bg-amber-50 text-amber-700 px-3 py-1.5 rounded-xl text-[10px] font-bold border border-amber-200 uppercase flex items-center space-x-2">
-              <Timer size={14} />
-              <span>{orcarData.length} Pedidos Filtrados</span>
+            <div className="bg-amber-50 text-amber-700 px-3 py-1.5 rounded-xl text-[9px] font-bold border border-amber-200 uppercase flex items-center space-x-2 shrink-0">
+              <Timer size={12} />
+              <span>{orcarData.length}</span>
             </div>
           </div>
         </header>
 
-        <main className="flex-1 p-8 overflow-hidden flex flex-col">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 flex-1 overflow-hidden">
+        <main className="flex-1 p-4 md:p-8 overflow-hidden flex flex-col">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 flex-1 overflow-hidden">
             <div className="flex flex-col space-y-4 overflow-hidden">
               <div className="flex items-center justify-between px-2">
                 <h3 className="font-bold text-slate-700 flex items-center space-x-2">
@@ -493,27 +494,27 @@ const App: React.FC = () => {
                     const email = workshopEmailsMap[item.oficina] || 'Padrão Marinha';
 
                     return (
-                      <div key={id} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all border-l-4 border-l-amber-500">
+                      <div key={id} className="bg-white border border-slate-200 rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all border-l-4 border-l-amber-500 animate-fade-in">
                         <div className="flex justify-between items-start mb-4">
                           <div>
-                            <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest">PS #{formatPS(item.ps, item.dataEntrada)}</span>
-                            <h4 className="font-bold text-slate-800 text-lg">{item.om}</h4>
+                            <span className="text-[9px] font-black text-amber-600 uppercase tracking-widest">PS #{formatPS(item.ps, item.dataEntrada)}</span>
+                            <h4 className="font-bold text-slate-800 text-base md:text-lg">{item.om}</h4>
                           </div>
-                          <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-3 py-1 rounded-full border border-slate-100 uppercase">{item.oficina}</span>
+                          <span className="text-[9px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-full border border-slate-100 uppercase">{item.oficina}</span>
                         </div>
-                        <p className="text-sm text-slate-500 mb-6 line-clamp-2 leading-relaxed">{item.descricao}</p>
-                        <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                        <p className="text-xs md:text-sm text-slate-500 mb-4 line-clamp-2 leading-relaxed">{item.descricao}</p>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-4 border-t border-slate-50 gap-4">
                           <div className="flex flex-col">
-                            <span className="text-[9px] text-slate-400 font-bold uppercase tracking-tight mb-0.5">Enviar para:</span>
-                            <span className="text-[11px] font-bold text-indigo-500 truncate max-w-[180px]" title={email}>{email}</span>
+                            <span className="text-[8px] text-slate-400 font-bold uppercase tracking-tight mb-0.5">Destino:</span>
+                            <span className="text-[10px] font-bold text-indigo-500 truncate max-w-[150px]" title={email}>{email}</span>
                           </div>
                           <button
                             onClick={() => setConfirmEmailItem(item)}
                             disabled={isSending}
-                            className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-indigo-700 shadow-sm disabled:opacity-50"
+                            className="flex items-center justify-center space-x-2 bg-indigo-600 text-white px-4 py-2 rounded-xl text-[11px] font-bold hover:bg-indigo-700 shadow-sm disabled:opacity-50 w-full sm:w-auto"
                           >
-                            {isSending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-                            <span>Disparar E-mail</span>
+                            {isSending ? <Loader2 size={12} className="animate-spin" /> : <Send size={12} />}
+                            <span>Disparar</span>
                           </button>
                         </div>
                       </div>
@@ -527,7 +528,7 @@ const App: React.FC = () => {
               <div className="flex items-center justify-between px-2">
                 <h3 className="font-bold text-emerald-700 flex items-center space-x-2">
                   <CheckCircle2 size={18} />
-                  <span>Enviados com Sucesso</span>
+                  <span>Enviados</span>
                   <span className="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full ml-2">{dispatched.length}</span>
                 </h3>
               </div>
@@ -535,18 +536,18 @@ const App: React.FC = () => {
                 {dispatched.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-slate-300 opacity-60">
                     <Mail size={48} className="mb-4" />
-                    <p className="text-sm font-medium">Nenhum disparo realizado nesta oficina.</p>
+                    <p className="text-sm font-medium text-center">Nenhum disparo realizado.</p>
                   </div>
                 ) : (
                   dispatched.map((item) => (
-                    <div key={`${item.ps}-${item.om}`} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm opacity-80 border-l-4 border-l-emerald-500">
+                    <div key={`${item.ps}-${item.om}`} className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm opacity-80 border-l-4 border-l-emerald-500">
                       <div className="flex justify-between items-center">
                         <div>
-                          <h4 className="font-bold text-slate-800 text-sm">{item.om} (PS {formatPS(item.ps, item.dataEntrada)})</h4>
-                          <span className="text-[10px] text-emerald-600 font-bold uppercase">{item.oficina}</span>
+                          <h4 className="font-bold text-slate-800 text-xs md:text-sm">{item.om} (PS {formatPS(item.ps, item.dataEntrada)})</h4>
+                          <span className="text-[9px] text-emerald-600 font-bold uppercase">{item.oficina}</span>
                         </div>
                         <button onClick={() => handleRevertDispatched(item)} className="p-2 text-slate-300 hover:text-red-500 transition-colors">
-                          <RotateCcw size={16} />
+                          <RotateCcw size={14} />
                         </button>
                       </div>
                     </div>
@@ -572,23 +573,34 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50 px-8 py-4 flex items-center justify-between shadow-sm">
-        <div className="flex items-center space-x-3">
-          <div className="bg-indigo-700 p-2 rounded-lg text-white">
-            <Ship size={24} />
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-50 px-4 md:px-8 py-4 flex flex-col md:flex-row items-center justify-between shadow-sm gap-4">
+        <div className="flex items-center justify-between w-full md:w-auto">
+          <div className="flex items-center space-x-3">
+            <div className="bg-indigo-700 p-2 rounded-lg text-white">
+              <Ship size={20} className="md:w-6 md:h-6" />
+            </div>
+            <div>
+              <h1 className="text-lg md:text-xl font-bold tracking-tight text-slate-900">Dashboard BFLa</h1>
+              <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Controle de PS</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900">BFLa - Dashboard Controle PS</h1>
-            <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Base Fluvial de Ladário</p>
+
+          <div className="flex items-center space-x-2 md:hidden">
+            <button onClick={loadData} disabled={loading} className="p-2 text-indigo-600">
+              <RefreshCcw size={20} className={loading ? "animate-spin" : ""} />
+            </button>
+            <button onClick={() => setIsFiltersOpen(!isFiltersOpen)} className="p-2 text-slate-500">
+              <Filter size={20} />
+            </button>
           </div>
         </div>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 md:space-x-4 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 scrollbar-hide">
           <button
             onClick={() => setCurrentView('orcar')}
-            className="flex items-center space-x-2 bg-amber-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-amber-600 transition-all shadow-lg shadow-amber-100 relative group"
+            className="flex-none flex items-center space-x-2 bg-amber-500 text-white px-3 md:px-5 py-2 md:py-2.5 rounded-xl text-xs md:sm font-bold hover:bg-amber-600 transition-all shadow-lg shadow-amber-100 relative"
           >
-            <DollarSign size={18} />
+            <DollarSign size={16} md:size={18} />
             <span>A Orçar</span>
             {totalOrcarCount > 0 && (
               <span className="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[9px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-white font-black">
@@ -599,25 +611,35 @@ const App: React.FC = () => {
 
           <button
             onClick={() => setCurrentView('settings')}
-            className="p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+            className="flex-none p-2 md:p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
             title="Configurações de Oficinas"
           >
-            <Settings size={22} />
+            <Settings size={20} md:size={22} />
           </button>
 
-          <div className="h-8 w-px bg-slate-200"></div>
+          <div className="h-8 w-px bg-slate-200 hidden md:block"></div>
 
-          <button onClick={loadData} disabled={loading} className="flex items-center space-x-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-indigo-700 transition-all disabled:opacity-50">
+          <button onClick={loadData} disabled={loading} className="flex-none hidden md:flex items-center space-x-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-indigo-700 transition-all disabled:opacity-50">
             <RefreshCcw size={18} className={loading ? "animate-spin" : ""} />
             <span>Atualizar</span>
           </button>
         </div>
       </header>
 
-      <main className="flex-1 p-8 space-y-8 max-w-[1800px] mx-auto w-full">
+      <main className="flex-1 p-4 md:p-8 space-y-6 md:space-y-8 max-w-[1800px] mx-auto w-full">
         {/* Filtros */}
-        <section className="bg-white/80 backdrop-blur-md rounded-2xl shadow-sm border border-slate-100 p-6 animate-fade-in">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        <section className="bg-white/80 backdrop-blur-md rounded-2xl shadow-sm border border-slate-100 p-4 md:p-6 animate-fade-in shadow-sm">
+          <button
+            onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+            className="flex items-center justify-between w-full md:hidden mb-2"
+          >
+            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center">
+              <Filter size={14} className="mr-2" /> Filtros e Período
+            </h3>
+            {isFiltersOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </button>
+
+          <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6 ${isFiltersOpen ? 'block' : 'hidden md:grid'}`}>
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Início</label>
               <input type="date" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" value={filters.startDate} onChange={(e) => setFilters({ ...filters, startDate: e.target.value })} />
@@ -660,13 +682,13 @@ const App: React.FC = () => {
         </section>
 
         {/* Gráficos */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-slate-100 p-8 h-[450px] hover-card">
-            <h3 className="font-bold text-slate-800 mb-8 flex items-center space-x-2">
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 h-[350px] md:h-[450px] hover-card">
+            <h3 className="font-bold text-slate-800 mb-6 md:mb-8 flex items-center space-x-2">
               <TrendingUp size={20} className="text-indigo-500" />
-              <span>Histórico de Entrada Mensal</span>
+              <span>Entrada Mensal</span>
             </h3>
-            <div className="h-[320px]">
+            <div className="h-[220px] md:h-[320px]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={temporalData}>
                   <defs>
@@ -684,19 +706,19 @@ const App: React.FC = () => {
               </ResponsiveContainer>
             </div>
           </div>
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-slate-100 p-8 h-[450px] hover-card">
-            <h3 className="font-bold text-slate-800 mb-8 flex items-center space-x-2">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 h-[350px] md:h-[450px] hover-card">
+            <h3 className="font-bold text-slate-800 mb-6 md:mb-8 flex items-center space-x-2">
               <AlertCircle size={20} className="text-amber-500" />
               <span>Status das Solicitações</span>
             </h3>
-            <div className="h-[320px]">
+            <div className="h-[220px] md:h-[320px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={statusDistribution} innerRadius={80} outerRadius={110} paddingAngle={5} dataKey="value">
+                  <Pie data={statusDistribution} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
                     {statusDistribution.map((entry, index) => <Cell key={index} fill={STATUS_COLORS[entry.name]} />)}
                   </Pie>
                   <Tooltip />
-                  <Legend verticalAlign="bottom" align="center" />
+                  <Legend verticalAlign="bottom" align="center" wrapperStyle={{ fontSize: '10px' }} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -704,19 +726,21 @@ const App: React.FC = () => {
         </section>
 
         {/* Lista de Pedidos */}
-        <section className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-          <div className="flex items-center justify-between mb-8">
+        <section className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 md:p-8 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4">
             <h3 className="font-bold text-slate-800 text-lg">Histórico Recente</h3>
             <button
               onClick={generateReport}
               disabled={isExporting}
-              className="flex items-center space-x-2 bg-slate-50 text-slate-600 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-100 transition-all border border-slate-200 disabled:opacity-50"
+              className="flex items-center justify-center space-x-2 bg-slate-50 text-slate-600 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-100 transition-all border border-slate-200 disabled:opacity-50 w-full md:w-auto"
             >
               {isExporting ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
               <span>{isExporting ? 'Processando...' : 'Gerar Relatório'}</span>
             </button>
           </div>
-          <div className="overflow-x-auto custom-scrollbar">
+
+          {/* Versão Desktop da Tabela */}
+          <div className="hidden md:block overflow-x-auto custom-scrollbar">
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-slate-50 text-[10px] text-slate-400 uppercase font-black tracking-widest">
@@ -743,6 +767,24 @@ const App: React.FC = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Versão Mobile (Card List) */}
+          <div className="md:hidden space-y-4">
+            {filteredData.slice(0, 8).map((item) => (
+              <div key={`${item.ps}-${item.om}`} className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">PS #{formatPS(item.ps, item.dataEntrada)}</span>
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase" style={{ backgroundColor: STATUS_COLORS[item.status] + '20', color: STATUS_COLORS[item.status] }}>{item.status}</span>
+                </div>
+                <h4 className="font-bold text-slate-800 mb-1">{item.om}</h4>
+                <p className="text-xs text-slate-500 line-clamp-2 mb-3 leading-relaxed">{item.descricao}</p>
+                <div className="flex items-center justify-between pt-3 border-t border-slate-200/50">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">{item.oficina}</span>
+                  <span className="text-xs font-mono font-bold text-slate-400">{item.hh} HH</span>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
       </main>
