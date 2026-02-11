@@ -73,6 +73,15 @@ const App: React.FC = () => {
     oficina: 'TODAS'
   });
 
+  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' | 'info' } | null>(null);
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => setNotification(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
   const loadData = async () => {
     setLoading(true);
     const sheetData = await fetchSheetData();
@@ -209,9 +218,10 @@ const App: React.FC = () => {
         return next;
       });
 
+      setNotification({ message: "E-mail enviado com sucesso!", type: 'success' });
     } catch (error) {
       console.error("Erro no disparo:", error);
-      alert("Erro ao enviar e-mail. Verifique as configurações.");
+      setNotification({ message: "Erro ao enviar e-mail.", type: 'error' });
     } finally {
       setSendingEmailId(null);
     }
@@ -239,11 +249,11 @@ const App: React.FC = () => {
 
       if (error) throw error;
 
-      alert("Configurações salvas no Supabase com sucesso!");
+      setNotification({ message: "Configurações salvas no Supabase!", type: 'success' });
       setCurrentView('dashboard');
     } catch (error) {
       console.error("Erro ao salvar configurações:", error);
-      alert("Erro ao salvar no banco de dados.");
+      setNotification({ message: "Erro ao salvar configurações.", type: 'error' });
     } finally {
       setIsSavingSettings(false);
     }
@@ -256,6 +266,51 @@ const App: React.FC = () => {
       next.delete(id);
       return next;
     });
+  };
+
+  const generateReport = () => {
+    if (filteredData.length === 0) {
+      setNotification({ message: "Nenhum dado para exportar.", type: 'info' });
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      const doc = new jsPDF();
+      const tableColumn = ["PS #", "OM", "Descrição", "Oficina", "Status", "Valor"];
+      const tableRows = filteredData.map(item => [
+        formatPS(item.ps, item.dataEntrada),
+        item.om,
+        item.descricao,
+        item.oficina,
+        item.status,
+        formatCurrency(item.valorOrcamento)
+      ]);
+
+      doc.setFontSize(18);
+      doc.text("Relatório de Controle de PS - BFLa", 14, 22);
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, 30);
+      doc.text(`Filtros: OM: ${filters.om} | Oficina: ${filters.oficina} | Status: ${filters.status}`, 14, 35);
+
+      autoTable(doc, {
+        head: [tableColumn],
+        body: tableRows,
+        startY: 45,
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: [79, 70, 229], textColor: 255 },
+        alternateRowStyles: { fillColor: [249, 250, 251] }
+      });
+
+      doc.save(`Relatorio_PS_BFLa_${new Date().getTime()}.pdf`);
+      setNotification({ message: "Relatório gerado com sucesso!", type: 'success' });
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      setNotification({ message: "Erro ao gerar o relatório.", type: 'error' });
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   // --- RENDERS ---
@@ -507,6 +562,16 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 relative overflow-x-hidden">
+      {/* Notificações Toasts */}
+      {notification && (
+        <div className={`fixed bottom-8 right-8 z-[200] px-6 py-4 rounded-2xl shadow-2xl flex items-center space-x-3 lg:animate-slide-in animate-fade-in ${notification.type === 'success' ? 'bg-emerald-600 text-white' :
+          notification.type === 'error' ? 'bg-red-600 text-white' : 'bg-indigo-600 text-white'
+          }`}>
+          {notification.type === 'success' ? <CheckCircle2 size={20} /> : notification.type === 'error' ? <AlertCircle size={20} /> : <Info size={20} />}
+          <span className="text-sm font-bold">{notification.message}</span>
+        </div>
+      )}
+
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50 px-8 py-4 flex items-center justify-between shadow-sm">
         <div className="flex items-center space-x-3">
           <div className="bg-indigo-700 p-2 rounded-lg text-white">
@@ -551,7 +616,7 @@ const App: React.FC = () => {
 
       <main className="flex-1 p-8 space-y-8 max-w-[1800px] mx-auto w-full">
         {/* Filtros */}
-        <section className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+        <section className="bg-white/80 backdrop-blur-md rounded-2xl shadow-sm border border-slate-100 p-6 animate-fade-in">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Início</label>
@@ -586,7 +651,7 @@ const App: React.FC = () => {
         </section>
 
         {/* KPIs */}
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
           <KPICard title="Total de PS" value={kpis.totalPS} subtitle="Volume no Período" icon={<LayoutDashboard className="text-indigo-600" size={24} />} colorClass="bg-indigo-600" />
           <KPICard title="Orçamento Total" value={formatCurrency(kpis.totalBudget)} subtitle="Volume Financeiro" icon={<DollarSign className="text-emerald-600" size={24} />} colorClass="bg-emerald-600" />
           <KPICard title="Total de HH" value={kpis.totalHH} subtitle="Esforço Humano" icon={<HardHat className="text-violet-600" size={24} />} colorClass="bg-violet-600" />
@@ -595,8 +660,8 @@ const App: React.FC = () => {
         </section>
 
         {/* Gráficos */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 h-[450px]">
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-slate-100 p-8 h-[450px] hover-card">
             <h3 className="font-bold text-slate-800 mb-8 flex items-center space-x-2">
               <TrendingUp size={20} className="text-indigo-500" />
               <span>Histórico de Entrada Mensal</span>
@@ -619,7 +684,7 @@ const App: React.FC = () => {
               </ResponsiveContainer>
             </div>
           </div>
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 h-[450px]">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-slate-100 p-8 h-[450px] hover-card">
             <h3 className="font-bold text-slate-800 mb-8 flex items-center space-x-2">
               <AlertCircle size={20} className="text-amber-500" />
               <span>Status das Solicitações</span>
@@ -639,12 +704,16 @@ const App: React.FC = () => {
         </section>
 
         {/* Lista de Pedidos */}
-        <section className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
+        <section className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 animate-fade-in" style={{ animationDelay: '0.4s' }}>
           <div className="flex items-center justify-between mb-8">
             <h3 className="font-bold text-slate-800 text-lg">Histórico Recente</h3>
-            <button onClick={() => { }} className="flex items-center space-x-2 bg-slate-50 text-slate-600 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-100 transition-all border border-slate-200">
-              <Download size={18} />
-              <span>Gerar Relatório</span>
+            <button
+              onClick={generateReport}
+              disabled={isExporting}
+              className="flex items-center space-x-2 bg-slate-50 text-slate-600 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-100 transition-all border border-slate-200 disabled:opacity-50"
+            >
+              {isExporting ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
+              <span>{isExporting ? 'Processando...' : 'Gerar Relatório'}</span>
             </button>
           </div>
           <div className="overflow-x-auto custom-scrollbar">
