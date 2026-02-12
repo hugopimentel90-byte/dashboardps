@@ -22,7 +22,7 @@ export default defineConfig(({ mode }) => {
           theme_color: '#4f46e5',
           icons: [
             {
-              src: 'logo.svg',
+              src: 'pwa-icon.svg',
               sizes: '512x512',
               type: 'image/svg+xml',
               purpose: 'any maskable'

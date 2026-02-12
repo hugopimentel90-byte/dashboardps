@@ -1,0 +1,53 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg_grad" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1e293b"/>
+      <stop offset="1" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="text_grad" x1="256" y1="400" x2="256" y2="480" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fbbf24"/>
+      <stop offset="1" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="512" height="512" rx="112" fill="url(#bg_grad)"/>
+  
+  <!-- Stylized Naval Ship Silhouette -->
+  <g transform="translate(100, 150) scale(0.6)">
+    <!-- Hull Base -->
+    <path d="M20 280 L480 280 L440 360 L60 360 Z" fill="#e2e8f0" />
+    
+    <!-- Superstructure (Ship Cabin/Bridge) -->
+    <path d="M100 280 L100 180 L350 180 L350 280 Z" fill="#f8fafc" />
+    <path d="M120 180 L120 100 L250 100 L250 180 Z" fill="#94a3b8" />
+    
+    <!-- Chimney / Stack -->
+    <path d="M260 100 L260 60 L310 60 L310 100 Z" fill="#475569" />
+    <rect x="260" y="60" width="50" height="10" fill="#1e293b" />
+    
+    <!-- Portholes -->
+    <circle cx="150" cy="230" r="12" fill="#1e293b" />
+    <circle cx="210" cy="230" r="12" fill="#1e293b" />
+    <circle cx="270" cy="230" r="12" fill="#1e293b" />
+    
+    <!-- Naval Grey Details -->
+    <rect x="350" y="200" width="80" height="20" fill="#64748b" />
+    <path d="M480 280 L440 220 L350 220 L350 280 Z" fill="#cbd5e1" />
+  </g>
+  
+  <!-- Text BFLa -->
+  <text 
+    x="256" 
+    y="455" 
+    text-anchor="middle" 
+    font-family="system-ui, -apple-system, sans-serif" 
+    font-weight="900" 
+    font-size="95" 
+    fill="url(#text_grad)"
+    style="letter-spacing: 4px;"
+  >BFLa</text>
+  
+  <!-- Subtle Glow or Accent -->
+  <path d="M20 400 Q256 420 492 400" stroke="#f59e0b" stroke-width="2" stroke-opacity="0.3" fill="none" />
+</svg>
