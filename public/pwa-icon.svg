@@ -1,66 +1,87 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="hull_grad" x1="256" y1="200" x2="256" y2="400" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#94a3b8"/>
-      <stop offset="1" stop-color="#475569"/>
-    </linearGradient>
+    <!-- Gradients for realistic metallic feel -->
     <linearGradient id="bg_grad" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
       <stop stop-color="#020617"/>
-      <stop offset="1" stop-color="#0f172a"/>
+      <stop offset="1" stop-color="#1e293b"/>
     </linearGradient>
-    <linearGradient id="gold_grad" x1="256" y1="400" x2="256" y2="460" gradientUnits="userSpaceOnUse">
+    <linearGradient id="hull_side" x1="256" y1="200" x2="256" y2="400" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#475569"/>
+      <stop offset="1" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="hull_top" x1="256" y1="100" x2="256" y2="250" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#94a3b8"/>
+      <stop offset="1" stop-color="#64748b"/>
+    </linearGradient>
+    <linearGradient id="gold_text" x1="256" y1="420" x2="256" y2="480" gradientUnits="userSpaceOnUse">
       <stop stop-color="#fbbf24"/>
       <stop offset="1" stop-color="#b45309"/>
     </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
   </defs>
-  
-  <!-- Outer Frame/Background -->
+
+  <!-- Background -->
   <rect width="512" height="512" rx="128" fill="url(#bg_grad)"/>
-  <rect x="10" y="10" width="492" height="492" rx="118" stroke="#1e293b" stroke-width="2" fill="none"/>
-
-  <!-- Robust Modern Warship (Stealth Frigate Silhouette) -->
-  <g transform="translate(50, 110) scale(1.1)">
-    <!-- Main Hull (Stealth Angles) -->
-    <path d="M10 210 L350 210 L380 230 L350 260 L30 260 Z" fill="url(#hull_grad)" />
-    <!-- Bow Sharpness -->
-    <path d="M350 210 L385 210 L350 230 Z" fill="#cbd5e1" opacity="0.8" />
+  
+  <!-- 3/4 Perspective Warship Design -->
+  <g transform="translate(256, 220)">
+    <!-- Main Hull (3/4 Perspective) -->
+    <!-- Side Starboard -->
+    <path d="M-220 50 L120 50 L180 80 L-160 80 Z" fill="url(#hull_side)" />
+    <!-- Bow Front Face -->
+    <path d="M120 50 L180 80 L140 10 L80 -20 Z" fill="#cbd5e1" />
+    <!-- Top Deck -->
+    <path d="M-210 50 L90 50 L50 -20 L-250 -20 Z" fill="url(#hull_top)" />
     
-    <!-- Superstructure (Forward Section) -->
-    <path d="M60 210 L85 130 L280 130 L300 210 Z" fill="#64748b" />
-    <path d="M90 130 L110 80 L230 80 L250 130 Z" fill="#475569" />
-    
-    <!-- Radar & Comms Tower -->
-    <path d="M150 80 L165 20 L185 20 L200 80 Z" fill="#1e293b" />
-    <rect x="140" y="35" width="70" height="4" fill="#334155" />
-    <rect x="155" y="55" width="40" height="4" fill="#334155" />
-    
-    <!-- Deck Cannon (Forward) -->
-    <g transform="translate(310, 200)">
-      <path d="M0 10 L20 10 L15 0 L5 0 Z" fill="#0f172a" />
-      <rect x="18" y="2" width="22" height="4" rx="1" fill="#0f172a" />
+    <!-- Superstructure (Command Center) -->
+    <g transform="translate(-100, -20)">
+      <!-- Main Block -->
+      <path d="M-20 0 L150 0 L120 -80 L-50 -80 Z" fill="#64748b" stroke="#334155" />
+      <!-- Upper Bridge -->
+      <path d="M10 -80 L110 -80 L90 -130 L-10 -130 Z" fill="#475569" stroke="#334155" />
+      
+      <!-- Windows (Glow effect) -->
+      <rect x="20" y="-115" width="60" height="15" fill="#0ea5e9" opacity="0.8" filter="url(#glow)" />
+      
+      <!-- Masts -->
+      <rect x="0" y="-180" width="8" height="50" fill="#1e293b" />
+      <rect x="50" y="-210" width="6" height="80" fill="#1e293b" />
+      <!-- Radar Spinners -->
+      <rect x="-10" y="-170" width="30" height="4" fill="#fbbf24" rx="2" />
+      <rect x="40" y="-200" width="25" height="3" fill="#fbbf24" rx="1" />
     </g>
-
-    <!-- Portholes (Functional Tech Look) -->
-    <rect x="100" y="160" width="25" height="10" rx="2" fill="#0ea5e9" opacity="0.6" />
-    <rect x="150" y="160" width="25" height="10" rx="2" fill="#0ea5e9" opacity="0.6" />
-    <rect x="200" y="160" width="25" height="10" rx="2" fill="#0ea5e9" opacity="0.6" />
     
-    <!-- Waterline / Shadow -->
-    <path d="M30 260 L350 260 L340 270 L40 270 Z" fill="#000" opacity="0.3" />
+    <!-- Forward Gun (Main Battery) -->
+    <g transform="translate(60, 20)">
+      <circle cx="0" cy="0" r="15" fill="#0f172a" />
+      <rect x="10" y="-3" width="40" height="6" rx="2" fill="#0f172a" />
+    </g>
+    
+    <!-- Stern Detail (Helipad markings) -->
+    <path d="M-220 10 L-140 10 L-160 -10 L-240 -10 Z" fill="none" stroke="white" stroke-width="2" stroke-opacity="0.3" />
+    <text x="-190" y="5" font-size="12" fill="white" font-family="monospace" opacity="0.3" text-anchor="middle">H</text>
+
+    <!-- Hull Accents -->
+    <path d="M-220 65 L150 65" stroke="#fbbf24" stroke-width="1.5" stroke-opacity="0.2" />
   </g>
   
-  <!-- BFLa Typography -->
+  <!-- "BFLA" Branding -->
   <text 
     x="256" 
-    y="450" 
+    y="460" 
     text-anchor="middle" 
-    font-family="Inter, system-ui, sans-serif" 
-    font-weight="950" 
-    font-size="88" 
-    fill="url(#gold_grad)"
-    style="letter-spacing: 8px; filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.8));"
+    font-family="system-ui, -apple-system, sans-serif" 
+    font-weight="900" 
+    font-size="90" 
+    fill="url(#gold_text)"
+    style="letter-spacing: 12px; filter: drop-shadow(0px 8px 10px rgba(0,0,0,0.9));"
   >BFLA</text>
 
-  <!-- Accent Detail -->
-  <rect x="176" y="465" width="160" height="6" rx="3" fill="#f59e0b" fill-opacity="0.4" />
+  <!-- Digital Accent -->
+  <rect x="216" y="475" width="80" height="4" rx="2" fill="#fbbf24" opacity="0.5" />
+  <circle cx="310" cy="477" r="2" fill="#fbbf24" opacity="0.5" />
+  <circle cx="202" cy="477" r="2" fill="#fbbf24" opacity="0.5" />
 </svg>
