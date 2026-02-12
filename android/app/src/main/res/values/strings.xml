@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Dash BFLa</string>
+    <string name="title_activity_main">Dash BFLa</string>
+    <string name="package_name">com.bfla.dashps</string>
+    <string name="custom_url_scheme">com.bfla.dashps</string>
+</resources>
