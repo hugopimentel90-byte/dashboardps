@@ -168,7 +168,7 @@ const App: React.FC = () => {
 
   const tratativasData = useMemo(() => {
     return data.filter(item => {
-      const notCompleted = item.status !== 'CONCLUÍDO' && item.status !== 'CANCELADO';
+      const notCompleted = item.status !== 'FINALIZADO' && item.status !== 'CANCELADO';
       const matchesOficina = tratativasOficinaFilter === 'TODAS' || item.oficina === tratativasOficinaFilter;
       return notCompleted && matchesOficina;
     });
@@ -177,7 +177,7 @@ const App: React.FC = () => {
   const kpis = useMemo<KPIStats>(() => {
     const totalPS = filteredData.length;
     const totalBudget = filteredData.reduce((acc, curr) => acc + curr.valorOrcamento, 0);
-    const completedCount = filteredData.filter(i => i.status === 'CONCLUÍDO').length;
+    const completedCount = filteredData.filter(i => i.status === 'FINALIZADO').length;
     const pendingCount = totalPS - completedCount - filteredData.filter(i => i.status === 'CANCELADO').length;
     const totalAditado = filteredData.filter(i => i.aditamento && i.aditamento.trim() !== "").length;
     const totalHH = filteredData.reduce((acc, curr) => acc + curr.hh, 0);
@@ -847,7 +847,7 @@ const App: React.FC = () => {
           <KPICard title="Orçamento Total" value={formatCurrency(kpis.totalBudget)} subtitle="Volume Financeiro" icon={<DollarSign className="text-emerald-600" size={24} />} colorClass="bg-emerald-600" />
           <KPICard title="Total de HH" value={kpis.totalHH} subtitle="Esforço Humano" icon={<HardHat className="text-violet-600" size={24} />} colorClass="bg-violet-600" />
           <KPICard title="PS Aditados" value={kpis.totalAditado} subtitle="Alterações Técnicas" icon={<FileText className="text-amber-600" size={24} />} colorClass="bg-amber-600" />
-          <KPICard title="Concluídos" value={kpis.completedCount} subtitle="Eficiência" icon={<CheckCircle2 className="text-blue-600" size={24} />} colorClass="bg-blue-600" />
+          <KPICard title="Finalizados" value={kpis.completedCount} subtitle="Eficiência" icon={<CheckCircle2 className="text-blue-600" size={24} />} colorClass="bg-blue-600" />
         </section>
 
         {/* Gráficos */}

@@ -4,7 +4,7 @@ export const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1nQw
 export const STATUS_COLORS: Record<string, string> = {
   'ORÇAR': '#f59e0b', // Amber
   'EXECUTANDO': '#3b82f6', // Blue
-  'CONCLUÍDO': '#10b981', // Emerald
+  'FINALIZADO': '#10b981', // Emerald
   'CANCELADO': '#ef4444', // Red
   'AGUARDANDO': '#8b5cf6', // Violet
   'IND REC': '#64748b' // Slate
