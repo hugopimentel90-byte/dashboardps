@@ -17,6 +17,7 @@ export interface ServiceOrder {
   mesEntrada: string;
   tempoEnvioDias: number;
   tempoAguIndRecMeses: number;
+  tratativa?: string;
 }
 
 export interface DashboardFilters {
