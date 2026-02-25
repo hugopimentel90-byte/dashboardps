@@ -376,8 +376,8 @@ const App: React.FC = () => {
 
   if (currentView === 'settings') {
     return (
-      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
-        <header className="bg-white border-b border-slate-200 sticky top-0 z-50 px-4 md:px-8 py-4 flex items-center justify-between shadow-sm">
+      <div className="min-h-screen flex flex-col bg-slate-100 text-slate-900">
+        <header className="bg-white border-b border-slate-300 sticky top-0 z-50 px-4 md:px-8 py-4 flex items-center justify-between shadow-sm">
           <div className="flex items-center space-x-4">
             <button onClick={() => setCurrentView('dashboard')} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500">
               <ArrowLeft size={20} />
@@ -445,7 +445,7 @@ const App: React.FC = () => {
     const dispatched = orcarData.filter(item => dispatchedEmails.has(`${item.ps}-${item.om}`));
 
     return (
-      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 relative">
+      <div className="min-h-screen flex flex-col bg-slate-100 text-slate-900 relative">
         {/* Modal de Confirmação de Disparo */}
         {confirmEmailItem && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -493,7 +493,7 @@ const App: React.FC = () => {
           </div>
         )}
 
-        <header className="bg-white border-b border-slate-200 sticky top-0 z-50 px-4 md:px-8 py-4 flex flex-col sm:flex-row items-center justify-between shadow-sm gap-4">
+        <header className="bg-white border-b border-slate-300 sticky top-0 z-50 px-4 md:px-8 py-4 flex flex-col sm:flex-row items-center justify-between shadow-sm gap-4">
           <div className="flex items-center justify-between w-full sm:w-auto">
             <div className="flex items-center space-x-4">
               <button onClick={() => setCurrentView('dashboard')} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500">
@@ -621,8 +621,8 @@ const App: React.FC = () => {
 
   if (currentView === 'tratativas') {
     return (
-      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 relative">
-        <header className="bg-white border-b border-slate-200 sticky top-0 z-50 px-4 md:px-8 py-4 flex flex-col sm:flex-row items-center justify-between shadow-sm gap-4">
+      <div className="min-h-screen flex flex-col bg-slate-100 text-slate-900 relative">
+        <header className="bg-white border-b border-slate-300 sticky top-0 z-50 px-4 md:px-8 py-4 flex flex-col sm:flex-row items-center justify-between shadow-sm gap-4">
           <div className="flex items-center justify-between w-full sm:w-auto">
             <div className="flex items-center space-x-4">
               <button onClick={() => setCurrentView('dashboard')} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500">
@@ -723,7 +723,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 relative overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-slate-100 text-slate-900 relative overflow-x-hidden">
       {/* Notificações Toasts */}
       {notification && (
         <div className={`fixed bottom-8 right-8 z-[200] px-6 py-4 rounded-2xl shadow-2xl flex items-center space-x-3 lg:animate-slide-in animate-fade-in ${notification.type === 'success' ? 'bg-emerald-600 text-white' :
@@ -734,7 +734,7 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50 px-4 md:px-8 py-4 flex flex-col md:flex-row items-center justify-between shadow-sm gap-4">
+      <header className="bg-white border-b border-slate-300 sticky top-0 z-50 px-4 md:px-8 py-4 flex flex-col md:flex-row items-center justify-between shadow-sm gap-4">
         <div className="flex items-center justify-between w-full md:w-auto">
           <div className="flex items-center space-x-3">
             <div className="bg-indigo-700 p-2 rounded-lg text-white">
@@ -797,7 +797,7 @@ const App: React.FC = () => {
 
       <main className="flex-1 p-4 md:p-8 space-y-6 md:space-y-8 max-w-[1800px] mx-auto w-full">
         {/* Filtros */}
-        <section className="bg-white/80 backdrop-blur-md rounded-2xl shadow-sm border border-slate-100 p-4 md:p-6 animate-fade-in shadow-sm">
+        <section className="bg-white/90 backdrop-blur-md rounded-2xl shadow-sm border border-slate-200 p-4 md:p-6 animate-fade-in shadow-sm">
           <button
             onClick={() => setIsFiltersOpen(!isFiltersOpen)}
             className="flex items-center justify-between w-full md:hidden mb-2"
