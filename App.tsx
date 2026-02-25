@@ -7,9 +7,9 @@ import {
 import {
   LayoutDashboard, Ship, Calendar, Filter,
   RefreshCcw, TrendingUp, DollarSign, Clock, CheckCircle2,
-  AlertCircle, HardHat, FileText, Settings, UserCheck, Timer,
+  AlertCircle, HardHat, FileText, Settings, UserCheck, Timer, Lock,
   Construction, Download, ArrowLeft, Mail, Send, Check, RotateCcw,
-  Loader2, Save, X, Info, Copy, HelpCircle, Menu, ChevronDown, ChevronUp
+  Loader2, Save, X, Info, Copy, HelpCircle, Menu, ChevronDown, ChevronUp, Eye, EyeOff
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -77,6 +77,13 @@ const App: React.FC = () => {
 
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' | 'info' } | null>(null);
+
+  // --- AUTHENTICATION STATE ---
+  const [isSettingsAuthenticated, setIsSettingsAuthenticated] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginForm, setLoginForm] = useState({ user: '', pass: '' });
+  const [loginError, setLoginError] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (notification) {
@@ -324,6 +331,29 @@ const App: React.FC = () => {
       setNotification({ message: "Erro ao salvar tratativa.", type: 'error' });
     } finally {
       setSavingTratativaId(null);
+    }
+  };
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (loginForm.user === 'APCP' && loginForm.pass === 'marinha123') {
+      setIsSettingsAuthenticated(true);
+      setShowLoginModal(false);
+      setCurrentView('settings');
+      setLoginError(false);
+      setLoginForm({ user: '', pass: '' });
+      setNotification({ message: "Acesso autorizado!", type: 'success' });
+    } else {
+      setLoginError(true);
+      setNotification({ message: "Usuário ou senha incorretos.", type: 'error' });
+    }
+  };
+
+  const handleOpenSettings = () => {
+    if (isSettingsAuthenticated) {
+      setCurrentView('settings');
+    } else {
+      setShowLoginModal(true);
     }
   };
 
@@ -724,6 +754,74 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-100 text-slate-900 relative overflow-x-hidden">
+      {/* Modal de Login das Configurações */}
+      {showLoginModal && (
+        <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => setShowLoginModal(false)}></div>
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm relative z-10 overflow-hidden animate-in zoom-in duration-200">
+            <div className="p-8">
+              <div className="bg-indigo-100 w-14 h-14 rounded-2xl flex items-center justify-center text-indigo-600 mb-6 mx-auto">
+                <Lock size={32} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-2 text-center">Acesso Restrito</h3>
+              <p className="text-sm text-slate-500 leading-relaxed mb-8 text-center">
+                Insira as credenciais para acessar as configurações de oficinas.
+              </p>
+
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Usuário</label>
+                  <input
+                    type="text"
+                    required
+                    className={`w-full px-4 py-3 bg-slate-50 border ${loginError ? 'border-red-300 ring-red-50' : 'border-slate-200'} rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all`}
+                    placeholder="Identificação"
+                    value={loginForm.user}
+                    onChange={(e) => setLoginForm({ ...loginForm, user: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Senha</label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required
+                      className={`w-full px-4 py-3 bg-slate-50 border ${loginError ? 'border-red-300 ring-red-50' : 'border-slate-200'} rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all pr-12`}
+                      placeholder="••••••••"
+                      value={loginForm.pass}
+                      onChange={(e) => setLoginForm({ ...loginForm, pass: e.target.value })}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="pt-4 flex flex-col gap-3">
+                  <button
+                    type="submit"
+                    className="w-full bg-indigo-600 text-white py-3.5 rounded-2xl text-sm font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all active:scale-[0.98]"
+                  >
+                    Entrar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowLoginModal(false)}
+                    className="w-full py-3 text-sm font-bold text-slate-400 hover:bg-slate-100 rounded-2xl transition-colors"
+                  >
+                    Voltar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Notificações Toasts */}
       {notification && (
         <div className={`fixed bottom-8 right-8 z-[200] px-6 py-4 rounded-2xl shadow-2xl flex items-center space-x-3 lg:animate-slide-in animate-fade-in ${notification.type === 'success' ? 'bg-emerald-600 text-white' :
@@ -779,8 +877,8 @@ const App: React.FC = () => {
           </button>
 
           <button
-            onClick={() => setCurrentView('settings')}
-            className="flex-none p-2 md:p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+            onClick={handleOpenSettings}
+            className={`flex-none p-2 md:p-2.5 rounded-xl transition-all ${currentView === 'settings' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400 hover:text-indigo-600 hover:bg-indigo-50'}`}
             title="Configurações de Oficinas"
           >
             <Settings size={20} md:size={22} />
