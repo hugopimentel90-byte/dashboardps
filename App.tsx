@@ -85,6 +85,9 @@ const App: React.FC = () => {
   const [loginError, setLoginError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  // --- PAGINATION STATE ---
+  const [pageSize, setPageSize] = useState(10);
+
   useEffect(() => {
     if (notification) {
       const timer = setTimeout(() => setNotification(null), 3000);
@@ -996,14 +999,28 @@ const App: React.FC = () => {
         <section className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 md:p-8 animate-fade-in" style={{ animationDelay: '0.4s' }}>
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4">
             <h3 className="font-bold text-slate-800 text-lg">Histórico Recente</h3>
-            <button
-              onClick={generateReport}
-              disabled={isExporting}
-              className="flex items-center justify-center space-x-2 bg-slate-50 text-slate-600 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-100 transition-all border border-slate-200 disabled:opacity-50 w-full md:w-auto"
-            >
-              {isExporting ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
-              <span>{isExporting ? 'Processando...' : 'Gerar Relatório'}</span>
-            </button>
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+              <div className="flex items-center space-x-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200 w-full sm:w-auto justify-between sm:justify-start">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ">Exibir:</label>
+                <select
+                  className="bg-transparent text-xs font-bold text-slate-600 outline-none cursor-pointer"
+                  value={pageSize}
+                  onChange={(e) => setPageSize(Number(e.target.value))}
+                >
+                  <option value={10}>10 PS</option>
+                  <option value={20}>20 PS</option>
+                  <option value={30}>30 PS</option>
+                </select>
+              </div>
+              <button
+                onClick={generateReport}
+                disabled={isExporting}
+                className="flex items-center justify-center space-x-2 bg-slate-50 text-slate-600 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-100 transition-all border border-slate-200 disabled:opacity-50 w-full sm:w-auto"
+              >
+                {isExporting ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
+                <span>{isExporting ? 'Processando...' : 'Gerar Relatório'}</span>
+              </button>
+            </div>
           </div>
 
           {/* Versão Desktop da Tabela */}
@@ -1020,7 +1037,7 @@ const App: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {filteredData.slice(0, 8).map((item) => (
+                {filteredData.slice(0, pageSize).map((item) => (
                   <tr key={`${item.ps}-${item.om}`} className="text-sm hover:bg-slate-50 transition-colors">
                     <td className="py-5 px-4 font-black text-indigo-600">{formatPS(item.ps, item.dataEntrada)}</td>
                     <td className="py-5 px-4 font-bold text-slate-700">{item.om}</td>
@@ -1038,7 +1055,7 @@ const App: React.FC = () => {
 
           {/* Versão Mobile (Card List) */}
           <div className="md:hidden space-y-4">
-            {filteredData.slice(0, 8).map((item) => (
+            {filteredData.slice(0, pageSize).map((item) => (
               <div key={`${item.ps}-${item.om}`} className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
                 <div className="flex justify-between items-start mb-2">
                   <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">PS #{formatPS(item.ps, item.dataEntrada)}</span>
