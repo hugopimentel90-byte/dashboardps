@@ -44,3 +44,14 @@ export interface KPIStats {
   avgEnvioOficina: number;
   avgAguIndRec: number;
 }
+
+export interface ApontamentoHH {
+  id?: string;
+  servico: string;
+  oficina: string;
+  data: string;
+  inicio: string;
+  fim: string;
+  qtdMilitares: number;
+  created_at?: string;
+}

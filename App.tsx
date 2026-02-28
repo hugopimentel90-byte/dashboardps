@@ -15,9 +15,10 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import emailjs from '@emailjs/browser';
 import { fetchSheetData } from './services/dataService';
-import { ServiceOrder, DashboardFilters, KPIStats } from './types';
+import { ServiceOrder, DashboardFilters, KPIStats, ApontamentoHH } from './types';
 import { STATUS_COLORS, MONTHS_ORDER, WORKSHOP_EMAILS as DEFAULT_EMAILS } from './constants';
 import { KPICard } from './components/KPICard';
+import ApontamentoForm from './components/ApontamentoForm';
 import { supabase } from './services/supabase';
 
 // --- CONFIGURAÇÃO EMAILJS ---
@@ -50,7 +51,7 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const [isExporting, setIsExporting] = useState(false);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'orcar' | 'tratativas' | 'settings'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'orcar' | 'tratativas' | 'settings' | 'apontamento'>('dashboard');
 
   const [sendingEmailId, setSendingEmailId] = useState<string | null>(null);
   const [confirmEmailItem, setConfirmEmailItem] = useState<ServiceOrder | null>(null);
@@ -334,6 +335,25 @@ const App: React.FC = () => {
       setNotification({ message: "Erro ao salvar tratativa.", type: 'error' });
     } finally {
       setSavingTratativaId(null);
+    }
+  };
+
+  const handleSaveApontamento = async (apontamento: ApontamentoHH) => {
+    try {
+      const { error } = await supabase
+        .from('apontamento_hh')
+        .insert([{
+          ...apontamento,
+          created_at: new Date().toISOString()
+        }]);
+
+      if (error) throw error;
+
+      setNotification({ message: "Apontamento salvo com sucesso!", type: 'success' });
+      setCurrentView('dashboard');
+    } catch (error) {
+      console.error("Erro ao salvar apontamento:", error);
+      setNotification({ message: "Erro ao salvar apontamento.", type: 'error' });
     }
   };
 
@@ -652,6 +672,34 @@ const App: React.FC = () => {
     );
   }
 
+  if (currentView === 'apontamento') {
+    return (
+      <div className="min-h-screen flex flex-col bg-slate-100 text-slate-900">
+        <header className="bg-white border-b border-slate-300 sticky top-0 z-50 px-4 md:px-8 py-4 flex items-center justify-between shadow-sm">
+          <div className="flex items-center space-x-4">
+            <button onClick={() => setCurrentView('dashboard')} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500">
+              <ArrowLeft size={20} />
+            </button>
+            <div>
+              <h1 className="text-lg md:text-xl font-bold tracking-tight text-slate-900 flex items-center space-x-2">
+                <Clock className="text-indigo-600 hide-mobile" size={24} />
+                <span>Apontamento HH</span>
+              </h1>
+              <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Registro de Atividade</p>
+            </div>
+          </div>
+        </header>
+        <main className="flex-1 p-4 md:p-8">
+          <ApontamentoForm
+            oficinas={oficinas}
+            onSave={handleSaveApontamento}
+            onCancel={() => setCurrentView('dashboard')}
+          />
+        </main>
+      </div>
+    );
+  }
+
   if (currentView === 'tratativas') {
     return (
       <div className="min-h-screen flex flex-col bg-slate-100 text-slate-900 relative">
@@ -877,6 +925,14 @@ const App: React.FC = () => {
           >
             <FileText size={16} md:size={18} />
             <span>Tratativas</span>
+          </button>
+
+          <button
+            onClick={() => setCurrentView('apontamento')}
+            className={`flex-none flex items-center space-x-2 px-3 md:px-5 py-2 md:py-2.5 rounded-xl text-xs md:sm font-bold transition-all shadow-lg relative ${currentView === 'apontamento' ? 'bg-emerald-700 text-white shadow-emerald-200' : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-100'}`}
+          >
+            <Clock size={16} md:size={18} />
+            <span>Apontamento HH</span>
           </button>
 
           <button
