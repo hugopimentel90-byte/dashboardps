@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Clock, HardHat, Calendar, FileText, Ship, Send, Loader2, X } from 'lucide-react';
+import { Clock, HardHat, Calendar, FileText, Ship, Send, Loader2, X, Check, HelpCircle } from 'lucide-react';
 import { ApontamentoHH } from '../types';
 
 interface ApontamentoFormProps {
@@ -19,10 +18,16 @@ const ApontamentoForm: React.FC<ApontamentoFormProps> = ({ oficinas, onSave, onC
         qtd_militares: 1
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        setShowConfirm(true);
+    };
+
+    const confirmSave = async () => {
         setIsSubmitting(true);
+        setShowConfirm(false);
         try {
             await onSave(formData);
             // Reset form on success if needed, but App.tsx might handle view change
@@ -34,121 +39,174 @@ const ApontamentoForm: React.FC<ApontamentoFormProps> = ({ oficinas, onSave, onC
     };
 
     return (
-        <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden animate-fade-in max-w-2xl mx-auto">
-            <div className="bg-indigo-600 p-6 text-white flex justify-between items-center">
-                <div className="flex items-center space-x-3">
-                    <Clock size={24} />
-                    <h2 className="text-xl font-bold">Novo Apontamento HH</h2>
-                </div>
-                <button onClick={onCancel} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                    <X size={20} />
-                </button>
-            </div>
+        <div className="relative">
+            {/* Modal de Confirmação */}
+            {showConfirm && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm shadow-2xl" onClick={() => setShowConfirm(false)}></div>
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md relative z-10 overflow-hidden animate-in fade-in zoom-in duration-200">
+                        <div className="p-8">
+                            <div className="bg-indigo-100 w-14 h-14 rounded-2xl flex items-center justify-center text-indigo-600 mb-6">
+                                <HelpCircle size={32} className="text-indigo-600" />
+                            </div>
+                            <h3 className="text-xl font-bold text-slate-900 mb-2">Confirmar Apontamento?</h3>
+                            <p className="text-sm text-slate-500 leading-relaxed mb-8">
+                                Deseja salvar este registro de atividade para a oficina <strong>{formData.oficina}</strong>?
+                            </p>
 
-            <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6">
-                <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
-                        <FileText size={14} className="mr-2" /> Serviço Realizado
-                    </label>
-                    <textarea
-                        required
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all min-h-[100px] resize-none"
-                        placeholder="Descreva detalhadamente o serviço..."
-                        value={formData.servico}
-                        onChange={(e) => setFormData({ ...formData, servico: e.target.value })}
-                    />
+                            <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100 mb-8 space-y-4">
+                                <div>
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Serviço</span>
+                                    <span className="text-xs font-bold text-slate-700 line-clamp-2">{formData.servico}</span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4 pt-3 border-t border-slate-100">
+                                    <div>
+                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Data</span>
+                                        <span className="text-xs font-bold text-slate-600">{formData.data.split('-').reverse().join('/')}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Horário</span>
+                                        <span className="text-xs font-bold text-slate-600">{formData.inicio} - {formData.fim}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center space-x-3">
+                                <button
+                                    onClick={() => setShowConfirm(false)}
+                                    className="flex-1 py-3 text-sm font-bold text-slate-400 hover:bg-slate-100 rounded-2xl transition-colors"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    onClick={confirmSave}
+                                    className="flex-1 bg-indigo-600 text-white py-3 rounded-2xl text-sm font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all flex items-center justify-center space-x-2"
+                                >
+                                    <Check size={18} />
+                                    <span>Confirmar</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden animate-fade-in max-w-2xl mx-auto">
+                <div className="bg-indigo-600 p-6 text-white flex justify-between items-center">
+                    <div className="flex items-center space-x-3">
+                        <Clock size={24} />
+                        <h2 className="text-xl font-bold">Novo Apontamento HH</h2>
+                    </div>
+                    <button onClick={onCancel} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                        <X size={20} />
+                    </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6">
                     <div className="space-y-2">
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
-                            <Ship size={14} className="mr-2" /> Oficina
+                            <FileText size={14} className="mr-2" /> Serviço Realizado
                         </label>
-                        <select
+                        <textarea
                             required
-                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none appearance-none cursor-pointer"
-                            value={formData.oficina}
-                            onChange={(e) => setFormData({ ...formData, oficina: e.target.value })}
+                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all min-h-[100px] resize-none"
+                            placeholder="Descreva detalhadamente o serviço..."
+                            value={formData.servico}
+                            onChange={(e) => setFormData({ ...formData, servico: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
+                                <Ship size={14} className="mr-2" /> Oficina
+                            </label>
+                            <select
+                                required
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none appearance-none cursor-pointer"
+                                value={formData.oficina}
+                                onChange={(e) => setFormData({ ...formData, oficina: e.target.value })}
+                            >
+                                <option value="">Selecione a Oficina</option>
+                                {oficinas.map(o => <option key={o} value={o}>{o}</option>)}
+                            </select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
+                                <Calendar size={14} className="mr-2" /> Data
+                            </label>
+                            <input
+                                type="date"
+                                required
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                                value={formData.data}
+                                onChange={(e) => setFormData({ ...formData, data: e.target.value })}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
+                                <Clock size={14} className="mr-2" /> Início
+                            </label>
+                            <input
+                                type="time"
+                                required
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                                value={formData.inicio}
+                                onChange={(e) => setFormData({ ...formData, inicio: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
+                                <Clock size={14} className="mr-2" /> Fim
+                            </label>
+                            <input
+                                type="time"
+                                required
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                                value={formData.fim}
+                                onChange={(e) => setFormData({ ...formData, fim: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
+                                <HardHat size={14} className="mr-2" /> Militares
+                            </label>
+                            <input
+                                type="number"
+                                min="1"
+                                required
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                                value={formData.qtd_militares}
+                                onChange={(e) => setFormData({ ...formData, qtd_militares: parseInt(e.target.value) || 1 })}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="pt-6 flex flex-col sm:flex-row gap-4">
+                        <button
+                            type="button"
+                            onClick={onCancel}
+                            className="flex-1 py-4 text-sm font-bold text-slate-400 hover:bg-slate-100 rounded-2xl transition-colors border border-transparent hover:border-slate-200"
                         >
-                            <option value="">Selecione a Oficina</option>
-                            {oficinas.map(o => <option key={o} value={o}>{o}</option>)}
-                        </select>
+                            Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="flex-[2] bg-indigo-600 text-white py-4 rounded-2xl text-sm font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
+                        >
+                            {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+                            <span>Salvar Apontamento</span>
+                        </button>
                     </div>
-
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
-                            <Calendar size={14} className="mr-2" /> Data
-                        </label>
-                        <input
-                            type="date"
-                            required
-                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-                            value={formData.data}
-                            onChange={(e) => setFormData({ ...formData, data: e.target.value })}
-                        />
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
-                            <Clock size={14} className="mr-2" /> Início
-                        </label>
-                        <input
-                            type="time"
-                            required
-                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-                            value={formData.inicio}
-                            onChange={(e) => setFormData({ ...formData, inicio: e.target.value })}
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
-                            <Clock size={14} className="mr-2" /> Fim
-                        </label>
-                        <input
-                            type="time"
-                            required
-                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-                            value={formData.fim}
-                            onChange={(e) => setFormData({ ...formData, fim: e.target.value })}
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
-                            <HardHat size={14} className="mr-2" /> Militares
-                        </label>
-                        <input
-                            type="number"
-                            min="1"
-                            required
-                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-                            value={formData.qtd_militares}
-                            onChange={(e) => setFormData({ ...formData, qtd_militares: parseInt(e.target.value) || 1 })}
-                        />
-                    </div>
-                </div>
-
-                <div className="pt-6 flex flex-col sm:flex-row gap-4">
-                    <button
-                        type="button"
-                        onClick={onCancel}
-                        className="flex-1 py-4 text-sm font-bold text-slate-400 hover:bg-slate-100 rounded-2xl transition-colors border border-transparent hover:border-slate-200"
-                    >
-                        Cancelar
-                    </button>
-                    <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="flex-[2] bg-indigo-600 text-white py-4 rounded-2xl text-sm font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
-                    >
-                        {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
-                        <span>Salvar Apontamento</span>
-                    </button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     );
 };
