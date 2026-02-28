@@ -16,7 +16,7 @@ const ApontamentoForm: React.FC<ApontamentoFormProps> = ({ oficinas, onSave, onC
         data: new Date().toISOString().split('T')[0],
         inicio: '',
         fim: '',
-        qtdMilitares: 1
+        qtd_militares: 1
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -125,8 +125,8 @@ const ApontamentoForm: React.FC<ApontamentoFormProps> = ({ oficinas, onSave, onC
                             min="1"
                             required
                             className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-                            value={formData.qtdMilitares}
-                            onChange={(e) => setFormData({ ...formData, qtdMilitares: parseInt(e.target.value) || 1 })}
+                            value={formData.qtd_militares}
+                            onChange={(e) => setFormData({ ...formData, qtd_militares: parseInt(e.target.value) || 1 })}
                         />
                     </div>
                 </div>

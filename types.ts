@@ -52,6 +52,6 @@ export interface ApontamentoHH {
   data: string;
   inicio: string;
   fim: string;
-  qtdMilitares: number;
+  qtd_militares: number;
   created_at?: string;
 }
