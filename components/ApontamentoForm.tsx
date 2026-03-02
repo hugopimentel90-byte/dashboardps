@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Clock, HardHat, Calendar, FileText, Ship, Send, Loader2, X, Check, HelpCircle } from 'lucide-react';
+import { Clock, HardHat, Calendar, FileText, Ship, Send, Loader2, X, Check, HelpCircle, Plus, Minus } from 'lucide-react';
 import { ApontamentoHH } from '../types';
 
 interface ApontamentoFormProps {
@@ -177,18 +177,32 @@ const ApontamentoForm: React.FC<ApontamentoFormProps> = ({ oficinas, onSave, onC
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
                                 <HardHat size={14} className="mr-2" /> Militares
                             </label>
-                            <input
-                                type="number"
-                                inputMode="numeric"
-                                min="1"
-                                required
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-                                value={formData.qtd_militares === 0 ? '' : formData.qtd_militares}
-                                onChange={(e) => {
-                                    const val = e.target.value === '' ? 0 : parseInt(e.target.value);
-                                    setFormData({ ...formData, qtd_militares: isNaN(val) ? 0 : val });
-                                }}
-                            />
+                            <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl overflow-hidden h-[46px]">
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, qtd_militares: Math.max(1, formData.qtd_militares - 1) })}
+                                    className="px-4 h-full hover:bg-slate-100 text-slate-500 transition-colors border-r border-slate-200 flex items-center justify-center active:bg-slate-200"
+                                >
+                                    <Minus size={16} />
+                                </button>
+                                <input
+                                    type="number"
+                                    required
+                                    className="flex-1 bg-transparent text-center font-bold text-slate-700 outline-none w-full text-base"
+                                    value={formData.qtd_militares}
+                                    onChange={(e) => {
+                                        const val = parseInt(e.target.value);
+                                        if (!isNaN(val)) setFormData({ ...formData, qtd_militares: Math.max(1, val) });
+                                    }}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, qtd_militares: formData.qtd_militares + 1 })}
+                                    className="px-4 h-full hover:bg-slate-100 text-slate-500 transition-colors border-l border-slate-200 flex items-center justify-center active:bg-slate-200"
+                                >
+                                    <Plus size={16} />
+                                </button>
+                            </div>
                         </div>
                     </div>
 
