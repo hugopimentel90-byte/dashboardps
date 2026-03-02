@@ -45,27 +45,27 @@ const ApontamentoForm: React.FC<ApontamentoFormProps> = ({ oficinas, onSave, onC
                 <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm shadow-2xl" onClick={() => setShowConfirm(false)}></div>
                     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md relative z-10 overflow-hidden animate-in fade-in zoom-in duration-200">
-                        <div className="p-8">
-                            <div className="bg-indigo-100 w-14 h-14 rounded-2xl flex items-center justify-center text-indigo-600 mb-6">
-                                <HelpCircle size={32} className="text-indigo-600" />
+                        <div className="p-6 md:p-8">
+                            <div className="bg-indigo-100 w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center text-indigo-600 mb-4 md:mb-6">
+                                <HelpCircle size={28} md:size={32} className="text-indigo-600" />
                             </div>
-                            <h3 className="text-xl font-bold text-slate-900 mb-2">Confirmar Apontamento?</h3>
-                            <p className="text-sm text-slate-500 leading-relaxed mb-8">
+                            <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-2">Confirmar Apontamento?</h3>
+                            <p className="text-xs md:text-sm text-slate-500 leading-relaxed mb-6 md:mb-8">
                                 Deseja salvar este registro de atividade para a oficina <strong>{formData.oficina}</strong>?
                             </p>
 
-                            <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100 mb-8 space-y-4">
+                            <div className="bg-slate-50 rounded-2xl p-4 md:p-5 border border-slate-100 mb-6 md:mb-8 space-y-3 md:space-y-4">
                                 <div>
-                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Serviço</span>
+                                    <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Serviço</span>
                                     <span className="text-xs font-bold text-slate-700 line-clamp-2">{formData.servico}</span>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4 pt-3 border-t border-slate-100">
+                                <div className="grid grid-cols-2 gap-3 md:gap-4 pt-3 border-t border-slate-100">
                                     <div>
-                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Data</span>
+                                        <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Data</span>
                                         <span className="text-xs font-bold text-slate-600">{formData.data.split('-').reverse().join('/')}</span>
                                     </div>
                                     <div>
-                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Horário</span>
+                                        <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Horário</span>
                                         <span className="text-xs font-bold text-slate-600">{formData.inicio} - {formData.fim}</span>
                                     </div>
                                 </div>
@@ -74,13 +74,13 @@ const ApontamentoForm: React.FC<ApontamentoFormProps> = ({ oficinas, onSave, onC
                             <div className="flex items-center space-x-3">
                                 <button
                                     onClick={() => setShowConfirm(false)}
-                                    className="flex-1 py-3 text-sm font-bold text-slate-400 hover:bg-slate-100 rounded-2xl transition-colors"
+                                    className="flex-1 py-3 text-sm font-bold text-slate-400 hover:bg-slate-100 rounded-2xl transition-all active:scale-95"
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     onClick={confirmSave}
-                                    className="flex-1 bg-indigo-600 text-white py-3 rounded-2xl text-sm font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all flex items-center justify-center space-x-2"
+                                    className="flex-1 bg-indigo-600 text-white py-3 rounded-2xl text-sm font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all active:scale-95 flex items-center justify-center space-x-2"
                                 >
                                     <Check size={18} />
                                     <span>Confirmar</span>
@@ -179,6 +179,7 @@ const ApontamentoForm: React.FC<ApontamentoFormProps> = ({ oficinas, onSave, onC
                             </label>
                             <input
                                 type="number"
+                                inputMode="numeric"
                                 min="1"
                                 required
                                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
@@ -192,14 +193,14 @@ const ApontamentoForm: React.FC<ApontamentoFormProps> = ({ oficinas, onSave, onC
                         <button
                             type="button"
                             onClick={onCancel}
-                            className="flex-1 py-4 text-sm font-bold text-slate-400 hover:bg-slate-100 rounded-2xl transition-colors border border-transparent hover:border-slate-200"
+                            className="flex-1 py-4 text-sm font-bold text-slate-400 hover:bg-slate-100 rounded-2xl transition-all active:scale-95 border border-transparent hover:border-slate-200"
                         >
                             Cancelar
                         </button>
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="flex-[2] bg-indigo-600 text-white py-4 rounded-2xl text-sm font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
+                            className="flex-[2] bg-indigo-600 text-white py-4 rounded-2xl text-sm font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all active:scale-95 flex items-center justify-center space-x-2 disabled:opacity-50"
                         >
                             {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
                             <span>Salvar Apontamento</span>

@@ -126,39 +126,41 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
     return (
         <div className="space-y-8 animate-fade-in">
             {/* Header Info & Filters */}
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                <div>
-                    <h2 className="text-2xl font-black text-slate-800 tracking-tight">Estatísticas de HH</h2>
-                    <p className="text-slate-500 text-sm font-medium">Análise de esforço humano por oficina</p>
+            <div className="flex flex-col sm:flex-row lg:flex-row sm:items-center justify-between gap-4 md:gap-6">
+                <div className="flex-1 min-w-0">
+                    <h2 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight truncate">Estatísticas de HH</h2>
+                    <p className="text-slate-500 text-[10px] md:text-sm font-medium uppercase tracking-wider">Análise de esforço humano</p>
                 </div>
 
                 {/* Filtros em Linha estilo Premium */}
-                <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-100 flex flex-wrap items-center gap-2">
-                    <div className="flex items-center space-x-2 px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-100">
-                        <Calendar size={14} className="text-indigo-500" />
-                        <input
-                            type="date"
-                            className="bg-transparent text-[10px] font-bold text-slate-700 outline-none"
-                            value={filters.startDate}
-                            onChange={(e) => setFilters(prev => ({ ...prev, startDate: e.target.value }))}
-                        />
-                        <span className="text-[10px] font-black text-slate-300">ATÉ</span>
-                        <input
-                            type="date"
-                            className="bg-transparent text-[10px] font-bold text-slate-700 outline-none"
-                            value={filters.endDate}
-                            onChange={(e) => setFilters(prev => ({ ...prev, endDate: e.target.value }))}
-                        />
+                <div className="bg-white p-1.5 md:p-2 rounded-2xl shadow-sm border border-slate-100 flex flex-wrap items-center gap-1.5 md:gap-2 w-full lg:w-auto">
+                    <div className="flex flex-1 sm:flex-none items-center space-x-2 px-2.5 md:px-3 py-1.5 md:py-2 bg-slate-50 rounded-xl border border-slate-100">
+                        <Calendar size={12} className="text-indigo-500 flex-none" />
+                        <div className="flex items-center space-x-1 min-w-0">
+                            <input
+                                type="date"
+                                className="bg-transparent text-[9px] md:text-[10px] font-bold text-slate-700 outline-none w-[90px] md:w-auto"
+                                value={filters.startDate}
+                                onChange={(e) => setFilters(prev => ({ ...prev, startDate: e.target.value }))}
+                            />
+                            <span className="text-[8px] font-black text-slate-300">ATÉ</span>
+                            <input
+                                type="date"
+                                className="bg-transparent text-[9px] md:text-[10px] font-bold text-slate-700 outline-none w-[90px] md:w-auto"
+                                value={filters.endDate}
+                                onChange={(e) => setFilters(prev => ({ ...prev, endDate: e.target.value }))}
+                            />
+                        </div>
                     </div>
 
-                    <div className="flex items-center space-x-2 px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-100 min-w-[140px]">
-                        <Filter size={14} className="text-indigo-500" />
+                    <div className="flex flex-1 sm:flex-none items-center space-x-2 px-2.5 md:px-3 py-1.5 md:py-2 bg-slate-50 rounded-xl border border-slate-100 min-w-[120px]">
+                        <Filter size={12} className="text-indigo-500 flex-none" />
                         <select
-                            className="bg-transparent text-[10px] font-bold text-slate-700 outline-none cursor-pointer w-full"
+                            className="bg-transparent text-[9px] md:text-[10px] font-bold text-slate-700 outline-none cursor-pointer w-full appearance-none"
                             value={filters.oficina}
                             onChange={(e) => setFilters(prev => ({ ...prev, oficina: e.target.value }))}
                         >
-                            <option value="TODAS">TODAS AS OFICINAS</option>
+                            <option value="TODAS">TODAS</option>
                             {oficinas.map(o => (
                                 <option key={o} value={o}>{o}</option>
                             ))}
@@ -168,22 +170,22 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
                     {(filters.startDate || filters.endDate || filters.oficina !== 'TODAS') && (
                         <button
                             onClick={clearFilters}
-                            className="p-1.5 hover:bg-red-50 text-red-400 rounded-lg transition-colors"
+                            className="p-2 hover:bg-red-50 text-red-400 rounded-lg transition-colors flex-none"
                             title="Limpar Filtros"
                         >
-                            <X size={16} />
+                            <X size={14} />
                         </button>
                     )}
                 </div>
 
-                <div className="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-2xl border border-indigo-100 flex items-center space-x-2 self-start lg:self-center">
-                    <Clock size={18} />
-                    <span className="font-black text-sm">{metrics.totalHH.toFixed(1)} HH Selecionados</span>
+                <div className="bg-indigo-50 text-indigo-700 px-3 md:px-4 py-1.5 md:py-2 rounded-2xl border border-indigo-100 flex items-center space-x-2 self-start sm:self-center shrink-0">
+                    <Clock size={16} />
+                    <span className="font-black text-[10px] md:text-sm whitespace-nowrap">{metrics.totalHH.toFixed(1)} HH SELECIONADOS</span>
                 </div>
             </div>
 
             {/* KPIs */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 <KPICard
                     title="HH Acumulado"
                     value={metrics.totalHH.toFixed(1)}
@@ -215,9 +217,9 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
             </div>
 
             {/* Gráficos */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
                 {/* HH por Oficina */}
-                <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 h-[450px]">
+                <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-4 md:p-8 h-[380px] md:h-[450px]">
                     <h3 className="font-bold text-slate-800 mb-8 flex items-center space-x-2">
                         <BarChart3 size={20} className="text-indigo-500" />
                         <span>Distribuição de HH por Oficina</span>
@@ -246,7 +248,7 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
                 </div>
 
                 {/* Evolução Temporal */}
-                <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 h-[450px]">
+                <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-4 md:p-8 h-[380px] md:h-[450px]">
                     <h3 className="font-bold text-slate-800 mb-8 flex items-center space-x-2">
                         <TrendingUp size={20} className="text-emerald-500" />
                         <span>Evolução Diária de HH</span>

@@ -943,7 +943,7 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <header className="bg-white border-b border-slate-300 sticky top-0 z-50 px-4 md:px-8 py-4 flex flex-col md:flex-row items-center justify-between shadow-sm gap-4">
+      <header className="bg-white border-b border-slate-300 sticky top-0 z-50 px-4 md:px-8 py-3 md:py-4 flex flex-col md:flex-row items-center justify-between shadow-sm gap-2 md:gap-4">
         <div className="flex items-center justify-between w-full md:w-auto">
           <div className="flex items-center space-x-3">
             <div className="bg-indigo-700 p-2 rounded-lg text-white">
@@ -979,12 +979,12 @@ const App: React.FC = () => {
         <div className="flex items-center space-x-2 md:space-x-4 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 scrollbar-hide">
           <button
             onClick={() => setCurrentView('orcar')}
-            className={`flex-none flex items-center space-x-2 px-3 md:px-5 py-2 md:py-2.5 rounded-xl text-xs md:sm font-bold transition-all shadow-lg relative ${currentView === 'orcar' ? 'bg-amber-600 text-white shadow-amber-200' : 'bg-amber-500 text-white hover:bg-amber-600 shadow-amber-100'}`}
+            className={`flex-none flex items-center space-x-2 px-3 md:px-5 py-2.5 md:py-3 rounded-xl text-xs md:text-sm font-bold transition-all shadow-md active:scale-95 relative ${currentView === 'orcar' ? 'bg-amber-600 text-white shadow-amber-200' : 'bg-amber-500 text-white hover:bg-amber-600 shadow-amber-100'}`}
           >
-            <DollarSign size={16} md:size={18} />
+            <DollarSign size={16} />
             <span>A Orçar</span>
             {totalOrcarCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[9px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-white font-black">
+              <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[8px] md:text-[9px] w-4 h-4 md:w-5 md:h-5 flex items-center justify-center rounded-full border-2 border-white font-black shadow-sm">
                 {totalOrcarCount}
               </span>
             )}
@@ -992,17 +992,17 @@ const App: React.FC = () => {
 
           <button
             onClick={() => setCurrentView('tratativas')}
-            className={`flex-none flex items-center space-x-2 px-3 md:px-5 py-2 md:py-2.5 rounded-xl text-xs md:sm font-bold transition-all shadow-lg relative ${currentView === 'tratativas' ? 'bg-indigo-700 text-white shadow-indigo-200' : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-100'}`}
+            className={`flex-none flex items-center space-x-2 px-3 md:px-5 py-2.5 md:py-3 rounded-xl text-xs md:text-sm font-bold transition-all shadow-md active:scale-95 relative ${currentView === 'tratativas' ? 'bg-indigo-700 text-white shadow-indigo-200' : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-100'}`}
           >
-            <FileText size={16} md:size={18} />
+            <FileText size={16} />
             <span>Tratativas</span>
           </button>
 
           <button
             onClick={() => setCurrentView('apontamento')}
-            className={`flex-none flex items-center space-x-2 px-3 md:px-5 py-2 md:py-2.5 rounded-xl text-xs md:sm font-bold transition-all shadow-lg relative ${currentView === 'apontamento' ? 'bg-emerald-700 text-white shadow-emerald-200' : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-100'}`}
+            className={`flex-none flex items-center space-x-2 px-3 md:px-5 py-2.5 md:py-3 rounded-xl text-xs md:text-sm font-bold transition-all shadow-md active:scale-95 relative ${currentView === 'apontamento' ? 'bg-emerald-700 text-white shadow-emerald-200' : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-100'}`}
           >
-            <Clock size={16} md:size={18} />
+            <Clock size={16} />
             <span>Apontamento HH</span>
           </button>
 
@@ -1011,18 +1011,18 @@ const App: React.FC = () => {
               setCurrentView('hh_oficinas');
               loadHHData();
             }}
-            className={`flex-none flex items-center space-x-2 px-3 md:px-5 py-2 md:py-2.5 rounded-xl text-xs md:sm font-bold transition-all shadow-lg relative ${currentView === 'hh_oficinas' ? 'bg-violet-700 text-white shadow-violet-200' : 'bg-violet-600 text-white hover:bg-violet-700 shadow-violet-100'}`}
+            className={`flex-none flex items-center space-x-2 px-3 md:px-5 py-2.5 md:py-3 rounded-xl text-xs md:text-sm font-bold transition-all shadow-md active:scale-95 relative ${currentView === 'hh_oficinas' ? 'bg-violet-700 text-white shadow-violet-200' : 'bg-violet-600 text-white hover:bg-violet-700 shadow-violet-100'}`}
           >
-            <TrendingUp size={16} md:size={18} />
+            <TrendingUp size={16} />
             <span>HH Oficinas</span>
           </button>
 
           <button
             onClick={handleOpenSettings}
-            className={`flex-none p-2 md:p-2.5 rounded-xl transition-all ${currentView === 'settings' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400 hover:text-indigo-600 hover:bg-indigo-50'}`}
+            className={`flex-none p-2.5 md:p-3 rounded-xl transition-all active:scale-95 ${currentView === 'settings' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400 hover:text-indigo-600 hover:bg-indigo-50'}`}
             title="Configurações de Oficinas"
           >
-            <Settings size={20} md:size={22} />
+            <Settings size={20} />
           </button>
 
           <div className="h-8 w-px bg-slate-200 hidden md:block"></div>
