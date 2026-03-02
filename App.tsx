@@ -19,6 +19,7 @@ import { ServiceOrder, DashboardFilters, KPIStats, ApontamentoHH } from './types
 import { STATUS_COLORS, MONTHS_ORDER, WORKSHOP_EMAILS as DEFAULT_EMAILS } from './constants';
 import { KPICard } from './components/KPICard';
 import ApontamentoForm from './components/ApontamentoForm';
+import HHDashboard from './components/HHDashboard';
 import { supabase } from './services/supabase';
 
 // --- CONFIGURAÇÃO EMAILJS ---
@@ -51,7 +52,9 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const [isExporting, setIsExporting] = useState(false);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'orcar' | 'tratativas' | 'settings' | 'apontamento'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'orcar' | 'tratativas' | 'settings' | 'apontamento' | 'hh_oficinas'>('dashboard');
+  const [hhData, setHHData] = useState<ApontamentoHH[]>([]);
+  const [loadingHH, setLoadingHH] = useState(false);
 
   const [sendingEmailId, setSendingEmailId] = useState<string | null>(null);
   const [confirmEmailItem, setConfirmEmailItem] = useState<ServiceOrder | null>(null);
@@ -137,9 +140,30 @@ const App: React.FC = () => {
       }
     };
     loadWorkshopEmails();
+    loadHHData();
     const interval = setInterval(loadData, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
+
+  const loadHHData = async () => {
+    setLoadingHH(true);
+    try {
+      const { data, error } = await supabase
+        .from('apontamento_hh')
+        .select('*')
+        .order('data', { ascending: false });
+
+      if (data && !error) {
+        setHHData(data);
+      } else if (error) {
+        console.error("Erro ao buscar HH:", error);
+      }
+    } catch (err) {
+      console.error("Erro inesperado:", err);
+    } finally {
+      setLoadingHH(false);
+    }
+  };
 
   useEffect(() => {
     localStorage.setItem('bfla_ps_dispatched', JSON.stringify(Array.from(dispatchedEmails)));
@@ -700,6 +724,41 @@ const App: React.FC = () => {
     );
   }
 
+  if (currentView === 'hh_oficinas') {
+    return (
+      <div className="min-h-screen flex flex-col bg-slate-100 text-slate-900">
+        <header className="bg-white border-b border-slate-300 sticky top-0 z-50 px-4 md:px-8 py-4 flex items-center justify-between shadow-sm">
+          <div className="flex items-center space-x-4">
+            <button onClick={() => setCurrentView('dashboard')} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500">
+              <ArrowLeft size={20} />
+            </button>
+            <div>
+              <h1 className="text-lg md:text-xl font-bold tracking-tight text-slate-900 flex items-center space-x-2">
+                <TrendingUp className="text-violet-600 hide-mobile" size={24} />
+                <span>Métricas de HH</span>
+              </h1>
+              <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Dashboard de Oficinas</p>
+            </div>
+          </div>
+          <button
+            onClick={loadHHData}
+            disabled={loadingHH}
+            className="p-2 text-violet-600 hover:bg-violet-50 rounded-full transition-colors disabled:opacity-50"
+          >
+            <RefreshCcw size={20} className={loadingHH ? "animate-spin" : ""} />
+          </button>
+        </header>
+        <main className="flex-1 p-4 md:p-8 max-w-[1800px] mx-auto w-full">
+          <HHDashboard
+            data={hhData}
+            loading={loadingHH}
+            onBack={() => setCurrentView('dashboard')}
+          />
+        </main>
+      </div>
+    );
+  }
+
   if (currentView === 'tratativas') {
     return (
       <div className="min-h-screen flex flex-col bg-slate-100 text-slate-900 relative">
@@ -944,6 +1003,17 @@ const App: React.FC = () => {
           >
             <Clock size={16} md:size={18} />
             <span>Apontamento HH</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setCurrentView('hh_oficinas');
+              loadHHData();
+            }}
+            className={`flex-none flex items-center space-x-2 px-3 md:px-5 py-2 md:py-2.5 rounded-xl text-xs md:sm font-bold transition-all shadow-lg relative ${currentView === 'hh_oficinas' ? 'bg-violet-700 text-white shadow-violet-200' : 'bg-violet-600 text-white hover:bg-violet-700 shadow-violet-100'}`}
+          >
+            <TrendingUp size={16} md:size={18} />
+            <span>HH Oficinas</span>
           </button>
 
           <button
