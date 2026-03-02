@@ -1,23 +1,35 @@
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     AreaChart, Area, Cell, Legend
 } from 'recharts';
 import {
     TrendingUp, HardHat, Clock, BarChart3,
-    ArrowLeft, Users, Zap, LayoutDashboard
+    ArrowLeft, Users, Zap, LayoutDashboard, Calendar, Filter, X
 } from 'lucide-react';
 import { ApontamentoHH } from '../types';
 import { KPICard } from './KPICard';
 
+interface HHDashboardFilters {
+    startDate: string;
+    endDate: string;
+    oficina: string;
+}
+
 interface HHDashboardProps {
     data: ApontamentoHH[];
     loading: boolean;
+    oficinas: string[];
     onBack: () => void;
 }
 
-const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, onBack }) => {
+const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBack }) => {
+    const [filters, setFilters] = useState<HHDashboardFilters>({
+        startDate: '',
+        endDate: '',
+        oficina: 'TODAS'
+    });
 
     // Função auxiliar para calcular HH de um registro
     const calculateHH = (item: ApontamentoHH) => {
@@ -44,7 +56,21 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, onBack }) => {
         const workshopMap: Record<string, number> = {};
         const temporalMap: Record<string, number> = {};
 
-        data.forEach(item => {
+        const filteredData = data.filter(item => {
+            const matchOficina = filters.oficina === 'TODAS' || item.oficina === filters.oficina;
+
+            let matchDate = true;
+            if (filters.startDate) {
+                matchDate = matchDate && item.data >= filters.startDate;
+            }
+            if (filters.endDate) {
+                matchDate = matchDate && item.data <= filters.endDate;
+            }
+
+            return matchOficina && matchDate;
+        });
+
+        filteredData.forEach(item => {
             const hh = calculateHH(item);
             totalHH += hh;
             totalMilitares += item.qtd_militares;
@@ -72,12 +98,13 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, onBack }) => {
         return {
             totalHH,
             totalMilitares,
-            avgHH: data.length > 0 ? totalHH / data.length : 0,
+            avgHH: filteredData.length > 0 ? totalHH / filteredData.length : 0,
             workshopData,
             temporalData,
-            totalRegistros: data.length
+            totalRegistros: filteredData.length,
+            filteredData
         };
-    }, [data]);
+    }, [data, filters]);
 
     if (loading) {
         return (
@@ -88,17 +115,70 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, onBack }) => {
         );
     }
 
+    const clearFilters = () => {
+        setFilters({
+            startDate: '',
+            endDate: '',
+            oficina: 'TODAS'
+        });
+    };
+
     return (
         <div className="space-y-8 animate-fade-in">
-            {/* Header Info */}
-            <div className="flex items-center justify-between mb-2">
+            {/* Header Info & Filters */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div>
                     <h2 className="text-2xl font-black text-slate-800 tracking-tight">Estatísticas de HH</h2>
                     <p className="text-slate-500 text-sm font-medium">Análise de esforço humano por oficina</p>
                 </div>
-                <div className="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-2xl border border-indigo-100 flex items-center space-x-2">
+
+                {/* Filtros em Linha estilo Premium */}
+                <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-100 flex flex-wrap items-center gap-2">
+                    <div className="flex items-center space-x-2 px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-100">
+                        <Calendar size={14} className="text-indigo-500" />
+                        <input
+                            type="date"
+                            className="bg-transparent text-[10px] font-bold text-slate-700 outline-none"
+                            value={filters.startDate}
+                            onChange={(e) => setFilters(prev => ({ ...prev, startDate: e.target.value }))}
+                        />
+                        <span className="text-[10px] font-black text-slate-300">ATÉ</span>
+                        <input
+                            type="date"
+                            className="bg-transparent text-[10px] font-bold text-slate-700 outline-none"
+                            value={filters.endDate}
+                            onChange={(e) => setFilters(prev => ({ ...prev, endDate: e.target.value }))}
+                        />
+                    </div>
+
+                    <div className="flex items-center space-x-2 px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-100 min-w-[140px]">
+                        <Filter size={14} className="text-indigo-500" />
+                        <select
+                            className="bg-transparent text-[10px] font-bold text-slate-700 outline-none cursor-pointer w-full"
+                            value={filters.oficina}
+                            onChange={(e) => setFilters(prev => ({ ...prev, oficina: e.target.value }))}
+                        >
+                            <option value="TODAS">TODAS AS OFICINAS</option>
+                            {oficinas.map(o => (
+                                <option key={o} value={o}>{o}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {(filters.startDate || filters.endDate || filters.oficina !== 'TODAS') && (
+                        <button
+                            onClick={clearFilters}
+                            className="p-1.5 hover:bg-red-50 text-red-400 rounded-lg transition-colors"
+                            title="Limpar Filtros"
+                        >
+                            <X size={16} />
+                        </button>
+                    )}
+                </div>
+
+                <div className="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-2xl border border-indigo-100 flex items-center space-x-2 self-start lg:self-center">
                     <Clock size={18} />
-                    <span className="font-black text-sm">{metrics.totalHH.toFixed(1)} HH Totais</span>
+                    <span className="font-black text-sm">{metrics.totalHH.toFixed(1)} HH Selecionados</span>
                 </div>
             </div>
 
@@ -128,7 +208,7 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, onBack }) => {
                 <KPICard
                     title="Registros"
                     value={metrics.totalRegistros}
-                    subtitle="Processados no Período"
+                    subtitle="Filtrados no Período"
                     icon={<BarChart3 className="text-emerald-600" size={24} />}
                     colorClass="bg-emerald-600"
                 />
@@ -136,7 +216,6 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, onBack }) => {
 
             {/* Gráficos */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
                 {/* HH por Oficina */}
                 <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 h-[450px]">
                     <h3 className="font-bold text-slate-800 mb-8 flex items-center space-x-2">
@@ -144,19 +223,25 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, onBack }) => {
                         <span>Distribuição de HH por Oficina</span>
                     </h3>
                     <div className="h-[320px]">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={metrics.workshopData} layout="vertical">
-                                <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f1f5f9" />
-                                <XAxis type="number" hide />
-                                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} width={120} tick={{ fontSize: 11, fontWeight: 'bold', fill: '#64748b' }} />
-                                <Tooltip
-                                    cursor={{ fill: '#f8fafc' }}
-                                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
-                                    formatter={(value: number) => [`${value.toFixed(1)} HH`, 'Esforço']}
-                                />
-                                <Bar dataKey="value" fill="#6366f1" radius={[0, 8, 8, 0]} barSize={20} />
-                            </BarChart>
-                        </ResponsiveContainer>
+                        {metrics.workshopData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={metrics.workshopData} layout="vertical">
+                                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f1f5f9" />
+                                    <XAxis type="number" hide />
+                                    <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} width={120} tick={{ fontSize: 11, fontWeight: 'bold', fill: '#64748b' }} />
+                                    <Tooltip
+                                        cursor={{ fill: '#f8fafc' }}
+                                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
+                                        formatter={(value: number) => [`${value.toFixed(1)} HH`, 'Esforço']}
+                                    />
+                                    <Bar dataKey="value" fill="#6366f1" radius={[0, 8, 8, 0]} barSize={20} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="h-full flex items-center justify-center text-slate-300 text-sm italic font-medium">
+                                Nenhuma oficina encontrada no filtro selecionado.
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -167,31 +252,42 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, onBack }) => {
                         <span>Evolução Diária de HH</span>
                     </h3>
                     <div className="h-[320px]">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={metrics.temporalData}>
-                                <defs>
-                                    <linearGradient id="colorHH" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.1} />
-                                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                <XAxis dataKey="formattedDate" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} />
-                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} />
-                                <Tooltip
-                                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
-                                    formatter={(value: number) => [`${value.toFixed(1)} HH`, 'HH Total']}
-                                />
-                                <Area type="monotone" dataKey="value" stroke="#10b981" strokeWidth={3} fill="url(#colorHH)" />
-                            </AreaChart>
-                        </ResponsiveContainer>
+                        {metrics.temporalData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={metrics.temporalData}>
+                                    <defs>
+                                        <linearGradient id="colorHH" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.1} />
+                                            <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                    <XAxis dataKey="formattedDate" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} />
+                                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} />
+                                    <Tooltip
+                                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
+                                        formatter={(value: number) => [`${value.toFixed(1)} HH`, 'HH Total']}
+                                    />
+                                    <Area type="monotone" dataKey="value" stroke="#10b981" strokeWidth={3} fill="url(#colorHH)" />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="h-full flex items-center justify-center text-slate-300 text-sm italic font-medium">
+                                Sem registros para o período/filtro selecionado.
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
 
             {/* Lista de Registros Recentes */}
             <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
-                <h3 className="font-bold text-slate-800 mb-6">Últimos Lançamentos de HH</h3>
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="font-bold text-slate-800">Lançamentos de HH {metrics.filteredData.length > 0 && `(${metrics.filteredData.length})`}</h3>
+                    {metrics.filteredData.length > 0 && (
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Exibindo registros filtrados</span>
+                    )}
+                </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
@@ -205,21 +301,29 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, onBack }) => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
-                            {data.slice(0, 10).map((item, idx) => {
-                                const hh = calculateHH(item);
-                                return (
-                                    <tr key={idx} className="text-sm hover:bg-slate-50 transition-colors">
-                                        <td className="py-4 px-4 font-bold text-slate-600">{new Date(item.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
-                                        <td className="py-4 px-4 text-slate-700 font-medium">{item.servico}</td>
-                                        <td className="py-4 px-4">
-                                            <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded-lg text-[10px] font-black uppercase">{item.oficina}</span>
-                                        </td>
-                                        <td className="py-4 px-4 font-bold text-slate-600">{item.qtd_militares}</td>
-                                        <td className="py-4 px-4 text-slate-500 text-xs">{item.inicio} - {item.fim}</td>
-                                        <td className="py-4 px-4 font-black text-indigo-600">{hh.toFixed(1)}</td>
-                                    </tr>
-                                );
-                            })}
+                            {metrics.filteredData.length === 0 ? (
+                                <tr>
+                                    <td colSpan={6} className="py-12 text-center text-slate-400 text-sm italic">
+                                        Nenhum lançamento encontrado para os filtros atuais.
+                                    </td>
+                                </tr>
+                            ) : (
+                                metrics.filteredData.slice(0, 50).map((item, idx) => {
+                                    const hh = calculateHH(item);
+                                    return (
+                                        <tr key={idx} className="text-sm hover:bg-slate-50 transition-colors">
+                                            <td className="py-4 px-4 font-bold text-slate-600">{new Date(item.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                                            <td className="py-4 px-4 text-slate-700 font-medium">{item.servico}</td>
+                                            <td className="py-4 px-4">
+                                                <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded-lg text-[10px] font-black uppercase">{item.oficina}</span>
+                                            </td>
+                                            <td className="py-4 px-4 font-bold text-slate-600">{item.qtd_militares}</td>
+                                            <td className="py-4 px-4 text-slate-500 text-xs">{item.inicio} - {item.fim}</td>
+                                            <td className="py-4 px-4 font-black text-indigo-600">{hh.toFixed(1)}</td>
+                                        </tr>
+                                    );
+                                })
+                            )}
                         </tbody>
                     </table>
                 </div>

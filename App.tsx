@@ -752,6 +752,7 @@ const App: React.FC = () => {
           <HHDashboard
             data={hhData}
             loading={loadingHH}
+            oficinas={oficinas}
             onBack={() => setCurrentView('dashboard')}
           />
         </main>
