@@ -905,6 +905,17 @@ const App: React.FC = () => {
           </div>
         </div>
 
+        {/* Novo Título Centralizado - 2º Escalão e PSI */}
+        <div className="hidden lg:flex items-center justify-center flex-1 min-w-0">
+          <div className="bg-slate-50 px-6 py-2 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-4 animate-fade-in whitespace-nowrap">
+            <div className="h-6 w-1 bg-indigo-500 rounded-full opacity-30"></div>
+            <h2 className="text-xs md:text-sm font-black text-slate-400 lg:text-slate-500 uppercase tracking-[0.3em] overflow-hidden text-ellipsis">
+              2º Escalão e PSI
+            </h2>
+            <div className="h-6 w-1 bg-indigo-500 rounded-full opacity-30"></div>
+          </div>
+        </div>
+
         <div className="flex items-center space-x-2 md:space-x-4 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 scrollbar-hide">
           <button
             onClick={() => setCurrentView('orcar')}
