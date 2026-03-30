@@ -820,7 +820,7 @@ const App: React.FC = () => {
                         </span>
                         <h4 className="font-bold text-slate-800 text-lg leading-tight">{item.om}</h4>
                       </div>
-                      <span className="px-2 py-1 rounded-full text-[9px] font-black uppercase" style={{ backgroundColor: STATUS_COLORS[item.status] + '15', color: STATUS_COLORS[item.status] }}>
+                      <span className="px-2 py-1 rounded-full text-[9px] font-black uppercase" style={{ backgroundColor: (STATUS_COLORS[item.status] || '#cbd5e1') + '15', color: STATUS_COLORS[item.status] || '#cbd5e1' }}>
                         {item.status}
                       </span>
                     </div>
@@ -1125,7 +1125,7 @@ const App: React.FC = () => {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie data={statusDistribution} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
-                    {statusDistribution.map((entry, index) => <Cell key={index} fill={STATUS_COLORS[entry.name]} />)}
+                    {statusDistribution.map((entry, index) => <Cell key={index} fill={STATUS_COLORS[entry.name] || '#cbd5e1'} />)}
                   </Pie>
                   <Tooltip />
                   <Legend verticalAlign="bottom" align="center" wrapperStyle={{ fontSize: '10px' }} />
@@ -1184,7 +1184,7 @@ const App: React.FC = () => {
                     <td className="py-5 px-4 text-slate-500 max-w-xs truncate" title={item.descricao}>{item.descricao}</td>
                     <td className="py-5 px-4 text-slate-500 font-medium">{item.oficina}</td>
                     <td className="py-5 px-4">
-                      <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase" style={{ backgroundColor: STATUS_COLORS[item.status] + '15', color: STATUS_COLORS[item.status] }}>{item.status}</span>
+                      <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase" style={{ backgroundColor: (STATUS_COLORS[item.status] || '#cbd5e1') + '15', color: STATUS_COLORS[item.status] || '#cbd5e1' }}>{item.status}</span>
                     </td>
                     <td className="py-5 px-4 font-mono font-bold text-slate-400">{item.hh}</td>
                   </tr>
@@ -1199,7 +1199,7 @@ const App: React.FC = () => {
               <div key={`${item.ps}-${item.om}`} className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
                 <div className="flex justify-between items-start mb-2">
                   <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">PS #{formatPS(item.ps, item.dataEntrada)}</span>
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase" style={{ backgroundColor: STATUS_COLORS[item.status] + '20', color: STATUS_COLORS[item.status] }}>{item.status}</span>
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase" style={{ backgroundColor: (STATUS_COLORS[item.status] || '#cbd5e1') + '20', color: STATUS_COLORS[item.status] || '#cbd5e1' }}>{item.status}</span>
                 </div>
                 <h4 className="font-bold text-slate-800 mb-1">{item.om}</h4>
                 <p className="text-xs text-slate-500 line-clamp-2 mb-3 leading-relaxed">{item.descricao}</p>
