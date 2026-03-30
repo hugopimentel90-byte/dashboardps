@@ -1084,7 +1084,7 @@ const App: React.FC = () => {
         {/* KPIs */}
         <section className="grid gap-6 animate-fade-in" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', animationDelay: '0.1s' }}>
           <KPICard title="Total de PS" value={kpis.totalPS} subtitle="Volume no Período" icon={<LayoutDashboard className="text-indigo-600" size={24} />} colorClass="bg-indigo-600" />
-          <KPICard title="Orçamento Total" value={formatCurrency(kpis.totalBudget)} subtitle="Volume Financeiro" icon={<DollarSign className="text-emerald-600" size={24} />} colorClass="bg-emerald-600" />
+          <KPICard title="Orçamento Orgânico" value={formatCurrency(kpis.totalBudget)} subtitle="Volume Financeiro" icon={<DollarSign className="text-emerald-600" size={24} />} colorClass="bg-emerald-600" />
           <KPICard title="Orçamento Terceiriz." value={formatCurrency(kpis.thirdPartyValue)} subtitle="Serviços Externos" icon={<DollarSign className="text-cyan-600" size={24} />} colorClass="bg-cyan-600" />
           <KPICard title="Total de HH" value={kpis.totalHH} subtitle="Esforço Humano" icon={<HardHat className="text-violet-600" size={24} />} colorClass="bg-violet-600" />
           <KPICard title="PS Aditados" value={kpis.totalAditado} subtitle="Alterações Técnicas" icon={<FileText className="text-amber-600" size={24} />} colorClass="bg-amber-600" />
