@@ -220,10 +220,11 @@ const App: React.FC = () => {
     const totalTerceirizado = filteredData.filter(i => i.tipoServico.toLowerCase().includes("ter")).length;
     const avgEnvioOficina = totalPS > 0 ? filteredData.reduce((acc, curr) => acc + curr.tempoEnvioDias, 0) / totalPS : 0;
     const avgAguIndRec = totalPS > 0 ? filteredData.reduce((acc, curr) => acc + curr.tempoAguIndRecMeses, 0) / totalPS : 0;
+    const thirdPartyValue = filteredData.reduce((acc, curr) => acc + curr.valorServicoTerceirizado, 0);
 
     return {
       totalPS, totalBudget, avgLeadTime: avgEnvioOficina, pendingCount, completedCount,
-      materialValue: 0, thirdPartyValue: 0, totalAditado, totalHH,
+      materialValue: 0, thirdPartyValue, totalAditado, totalHH,
       totalOrganico, totalTerceirizado, avgEnvioOficina, avgAguIndRec
     };
   }, [filteredData]);
@@ -1081,9 +1082,10 @@ const App: React.FC = () => {
         </section>
 
         {/* KPIs */}
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
           <KPICard title="Total de PS" value={kpis.totalPS} subtitle="Volume no Período" icon={<LayoutDashboard className="text-indigo-600" size={24} />} colorClass="bg-indigo-600" />
           <KPICard title="Orçamento Total" value={formatCurrency(kpis.totalBudget)} subtitle="Volume Financeiro" icon={<DollarSign className="text-emerald-600" size={24} />} colorClass="bg-emerald-600" />
+          <KPICard title="Orçamento Terceiriz." value={formatCurrency(kpis.thirdPartyValue)} subtitle="Serviços Externos" icon={<DollarSign className="text-cyan-600" size={24} />} colorClass="bg-cyan-600" />
           <KPICard title="Total de HH" value={kpis.totalHH} subtitle="Esforço Humano" icon={<HardHat className="text-violet-600" size={24} />} colorClass="bg-violet-600" />
           <KPICard title="PS Aditados" value={kpis.totalAditado} subtitle="Alterações Técnicas" icon={<FileText className="text-amber-600" size={24} />} colorClass="bg-amber-600" />
           <KPICard title="Finalizados" value={kpis.completedCount} subtitle="Eficiência" icon={<CheckCircle2 className="text-blue-600" size={24} />} colorClass="bg-blue-600" />
