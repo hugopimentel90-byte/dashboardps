@@ -16,10 +16,10 @@ export const KPICard: React.FC<KPICardProps> = ({ title, value, subtitle, icon, 
         {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { size: 18, className: (icon as React.ReactElement).props.className + " md:w-6 md:h-6" }) : icon}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-[10px] md:text-xs xl:text-[11px] 2xl:text-sm font-medium text-slate-500 leading-tight">{title}</p>
-        <h3 className="text-sm sm:text-lg md:text-xl xl:text-lg 2xl:text-2xl font-bold text-slate-900 mt-1 leading-tight tracking-tight break-words">{value}</h3>
+        <p className="text-xs md:text-sm font-medium text-slate-500 leading-tight">{title}</p>
+        <h3 className="text-xl md:text-2xl font-bold text-slate-900 mt-1 leading-tight tracking-tight break-words">{value}</h3>
         {subtitle && (
-          <p className="text-[8px] md:text-[10px] xl:text-[9px] 2xl:text-xs text-slate-400 mt-1 font-medium uppercase tracking-wider leading-tight">{subtitle}</p>
+          <p className="text-[10px] md:text-xs text-slate-400 mt-1 font-bold uppercase tracking-wider leading-tight">{subtitle}</p>
         )}
       </div>
     </div>

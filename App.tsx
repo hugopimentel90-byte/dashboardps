@@ -1082,7 +1082,7 @@ const App: React.FC = () => {
         </section>
 
         {/* KPIs */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+        <section className="grid gap-6 animate-fade-in" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', animationDelay: '0.1s' }}>
           <KPICard title="Total de PS" value={kpis.totalPS} subtitle="Volume no Período" icon={<LayoutDashboard className="text-indigo-600" size={24} />} colorClass="bg-indigo-600" />
           <KPICard title="Orçamento Total" value={formatCurrency(kpis.totalBudget)} subtitle="Volume Financeiro" icon={<DollarSign className="text-emerald-600" size={24} />} colorClass="bg-emerald-600" />
           <KPICard title="Orçamento Terceiriz." value={formatCurrency(kpis.thirdPartyValue)} subtitle="Serviços Externos" icon={<DollarSign className="text-cyan-600" size={24} />} colorClass="bg-cyan-600" />
