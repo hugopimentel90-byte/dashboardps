@@ -116,6 +116,7 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
             totalMilitares,
             avgHH: filteredData.length > 0 ? totalHH / filteredData.length : 0,
             avgServicosPorDia: filteredData.length > 0 ? filteredData.length / filterDays : 0,
+            avgHHPorDia: totalHH / filterDays,
             workshopData,
             temporalData,
             totalRegistros: filteredData.length,
@@ -202,7 +203,7 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
             </div>
 
             {/* KPIs */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 lg:grid-cols-3 gap-4 md:gap-6">
                 <KPICard
                     title="HH Acumulado"
                     value={metrics.totalHH.toFixed(1)}
@@ -237,6 +238,13 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
                     subtitle="Cadastros / Dia Ativo"
                     icon={<Calendar className="text-cyan-600" size={24} />}
                     colorClass="bg-cyan-600"
+                />
+                <KPICard
+                    title="HH/dia"
+                    value={metrics.avgHHPorDia.toFixed(1)}
+                    subtitle="Média de Esforço"
+                    icon={<TrendingUp className="text-rose-600" size={24} />}
+                    colorClass="bg-rose-600"
                 />
             </div>
 
