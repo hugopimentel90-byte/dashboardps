@@ -54,7 +54,7 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
         let totalHH = 0;
         let totalMilitares = 0;
         const workshopMap: Record<string, number> = {};
-        const temporalMap: Record<string, number> = {};
+        const temporalMap: Record<string, { hh: number, count: number }> = {};
 
         const filteredData = data.filter(item => {
             const matchOficina = filters.oficina === 'TODAS' || item.oficina === filters.oficina;
@@ -78,9 +78,11 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
             // Por Oficina
             workshopMap[item.oficina] = (workshopMap[item.oficina] || 0) + hh;
 
-            // Por Data (Agrupado por dia/semana)
+            // Por Data
             const dateKey = item.data; // YYYY-MM-DD
-            temporalMap[dateKey] = (temporalMap[dateKey] || 0) + hh;
+            if (!temporalMap[dateKey]) temporalMap[dateKey] = { hh: 0, count: 0 };
+            temporalMap[dateKey].hh += hh;
+            temporalMap[dateKey].count += 1;
         });
 
         const workshopData = Object.entries(workshopMap)
@@ -88,9 +90,10 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
             .sort((a, b) => b.value - a.value);
 
         const temporalData = Object.entries(temporalMap)
-            .map(([date, value]) => ({
+            .map(([date, data]) => ({
                 date,
-                value,
+                value: data.hh,
+                count: data.count,
                 formattedDate: new Date(date + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
             }))
             .sort((a, b) => a.date.localeCompare(b.date));
@@ -217,7 +220,7 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
             </div>
 
             {/* Gráficos */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8">
                 {/* HH por Oficina */}
                 <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-4 md:p-8 h-[380px] md:h-[450px]">
                     <h3 className="font-bold text-slate-800 mb-8 flex items-center space-x-2">
@@ -272,6 +275,35 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
                                     />
                                     <Area type="monotone" dataKey="value" stroke="#10b981" strokeWidth={3} fill="url(#colorHH)" />
                                 </AreaChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="h-full flex items-center justify-center text-slate-300 text-sm italic font-medium">
+                                Sem registros para o período/filtro selecionado.
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Volume de Serviços */}
+                <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-4 md:p-8 h-[380px] md:h-[450px]">
+                    <h3 className="font-bold text-slate-800 mb-8 flex items-center space-x-2">
+                        <Calendar size={20} className="text-cyan-500" />
+                        <span>Volume de Serviços Diário</span>
+                    </h3>
+                    <div className="h-[320px]">
+                        {metrics.temporalData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={metrics.temporalData}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                    <XAxis dataKey="formattedDate" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} />
+                                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} />
+                                    <Tooltip
+                                        cursor={{ fill: '#f8fafc' }}
+                                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
+                                        formatter={(value: number) => [`${value} lançamentos`, 'Volume']}
+                                    />
+                                    <Bar dataKey="count" fill="#06b6d4" radius={[4, 4, 0, 0]} barSize={20} />
+                                </BarChart>
                             </ResponsiveContainer>
                         ) : (
                             <div className="h-full flex items-center justify-center text-slate-300 text-sm italic font-medium">
