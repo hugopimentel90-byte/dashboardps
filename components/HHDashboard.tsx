@@ -219,7 +219,7 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
                     colorClass="bg-emerald-600"
                 />
                 <KPICard
-                    title="Média Diária"
+                    title="PS/dia"
                     value={metrics.avgServicosPorDia.toFixed(1)}
                     subtitle="Cadastros / Dia Ativo"
                     icon={<Calendar className="text-cyan-600" size={24} />}
