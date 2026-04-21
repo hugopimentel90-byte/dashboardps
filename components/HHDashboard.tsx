@@ -102,6 +102,7 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
             totalHH,
             totalMilitares,
             avgHH: filteredData.length > 0 ? totalHH / filteredData.length : 0,
+            avgServicosPorDia: temporalData.length > 0 ? filteredData.length / temporalData.length : 0,
             workshopData,
             temporalData,
             totalRegistros: filteredData.length,
@@ -188,7 +189,7 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
             </div>
 
             {/* KPIs */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
                 <KPICard
                     title="HH Acumulado"
                     value={metrics.totalHH.toFixed(1)}
@@ -204,18 +205,25 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
                     colorClass="bg-blue-600"
                 />
                 <KPICard
-                    title="Média por Serviço"
+                    title="Média de HH"
                     value={metrics.avgHH.toFixed(1)}
-                    subtitle="HH / Registro"
+                    subtitle="HH por Registro"
                     icon={<Zap className="text-amber-600" size={24} />}
                     colorClass="bg-amber-600"
                 />
                 <KPICard
-                    title="Registros"
+                    title="Registros Totais"
                     value={metrics.totalRegistros}
-                    subtitle="Filtrados no Período"
+                    subtitle="No Período"
                     icon={<BarChart3 className="text-emerald-600" size={24} />}
                     colorClass="bg-emerald-600"
+                />
+                <KPICard
+                    title="Média Diária"
+                    value={metrics.avgServicosPorDia.toFixed(1)}
+                    subtitle="Cadastros / Dia Ativo"
+                    icon={<Calendar className="text-cyan-600" size={24} />}
+                    colorClass="bg-cyan-600"
                 />
             </div>
 
