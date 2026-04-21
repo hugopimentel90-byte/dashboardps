@@ -98,11 +98,24 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
             }))
             .sort((a, b) => a.date.localeCompare(b.date));
 
+        let filterDays = 1;
+        if (filters.startDate && filters.endDate) {
+            const start = new Date(filters.startDate + 'T00:00:00');
+            const end = new Date(filters.endDate + 'T00:00:00');
+            const diff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24)) + 1;
+            filterDays = diff > 0 ? diff : 1;
+        } else if (temporalData.length > 0) {
+            const start = new Date(temporalData[0].date + 'T00:00:00');
+            const end = new Date(temporalData[temporalData.length - 1].date + 'T00:00:00');
+            const diff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24)) + 1;
+            filterDays = diff > 0 ? diff : 1;
+        }
+
         return {
             totalHH,
             totalMilitares,
             avgHH: filteredData.length > 0 ? totalHH / filteredData.length : 0,
-            avgServicosPorDia: temporalData.length > 0 ? filteredData.length / temporalData.length : 0,
+            avgServicosPorDia: filteredData.length > 0 ? filteredData.length / filterDays : 0,
             workshopData,
             temporalData,
             totalRegistros: filteredData.length,
