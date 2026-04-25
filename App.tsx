@@ -1095,6 +1095,8 @@ const App: React.FC = () => {
           <KPICard title="Total de HH" value={kpis.totalHH} subtitle="Esforço Humano" icon={<HardHat className="text-violet-600" size={24} />} colorClass="bg-violet-600" />
           <KPICard title="PS Aditados" value={kpis.totalAditado} subtitle="Alterações Técnicas" icon={<FileText className="text-amber-600" size={24} />} colorClass="bg-amber-600" />
           <KPICard title="Finalizados" value={kpis.completedCount} subtitle="Eficiência" icon={<CheckCircle2 className="text-blue-600" size={24} />} colorClass="bg-blue-600" />
+          <KPICard title="Tempo Envio Oficina" value={`${kpis.avgEnvioOficina.toFixed(1)} Dias`} subtitle="Média do Período" icon={<Timer className="text-rose-600" size={24} />} colorClass="bg-rose-600" />
+          <KPICard title="Tempo Indicação Rec." value={`${kpis.avgAguIndRec.toFixed(1)} Meses`} subtitle="Média AGU IND REC" icon={<Calendar className="text-teal-600" size={24} />} colorClass="bg-teal-600" />
         </section>
 
         {/* Gráficos */}
