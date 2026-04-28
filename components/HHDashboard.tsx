@@ -5,11 +5,11 @@ import {
 } from 'recharts';
 import {
     TrendingUp, HardHat, Clock, BarChart3,
-    ArrowLeft, Users, Zap, LayoutDashboard, Calendar, Filter, X, Settings, Loader2, Save, Plus, Trash2
+    ArrowLeft, Users, Zap, LayoutDashboard, Calendar, Filter, X, Settings, Loader2, Plus, Trash2, CheckCircle2
 } from 'lucide-react';
 import { ApontamentoHH } from '../types';
 import { KPICard } from './KPICard';
-import { supabase } from '../services/supabase';
+import { loadServicosOficina, saveServicosOficina } from '../services/servicosStorage';
 
 interface HHDashboardFilters {
     startDate: string;
@@ -37,7 +37,7 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
     const [servicosList, setServicosList] = useState<string[]>([]);
     const [newServico, setNewServico] = useState('');
     const [loadingConfig, setLoadingConfig] = useState(false);
-    const [savingConfig, setSavingConfig] = useState(false);
+    const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
 
     // Fetch config when modal opens or oficina changes
     useEffect(() => {
@@ -49,17 +49,8 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
     const loadConfigOficina = async (oficinaName: string) => {
         setLoadingConfig(true);
         try {
-            const { data, error } = await supabase
-                .from('oficina_servicos')
-                .select('servicos')
-                .eq('oficina', oficinaName)
-                .single();
-
-            if (data && !error) {
-                setServicosList(data.servicos || []);
-            } else {
-                setServicosList([]);
-            }
+            const servicos = await loadServicosOficina(oficinaName);
+            setServicosList(servicos);
         } catch (err) {
             console.error("Erro ao carregar serviços da oficina", err);
             setServicosList([]);
@@ -68,35 +59,25 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
         }
     };
 
-    const handleSaveConfig = async () => {
-        setSavingConfig(true);
-        try {
-            const { error } = await supabase
-                .from('oficina_servicos')
-                .upsert({
-                    oficina: configOficina,
-                    servicos: servicosList,
-                    updated_at: new Date().toISOString()
-                }, { onConflict: 'oficina' });
-
-            if (error) throw error;
-            // Poderia adicionar uma notificação de sucesso aqui
-        } catch (err) {
-            console.error("Erro ao salvar", err);
-        } finally {
-            setSavingConfig(false);
-        }
-    };
-
-    const handleAddServico = () => {
+    const handleAddServico = async () => {
         if (newServico.trim() && !servicosList.includes(newServico.trim())) {
-            setServicosList([...servicosList, newServico.trim()]);
+            setSaveStatus('saving');
+            const newList = [...servicosList, newServico.trim()];
+            setServicosList(newList);
             setNewServico('');
+            await saveServicosOficina(configOficina, newList);
+            setSaveStatus('saved');
+            setTimeout(() => setSaveStatus('idle'), 2000);
         }
     };
 
-    const handleRemoveServico = (servico: string) => {
-        setServicosList(servicosList.filter(s => s !== servico));
+    const handleRemoveServico = async (servico: string) => {
+        setSaveStatus('saving');
+        const newList = servicosList.filter(s => s !== servico);
+        setServicosList(newList);
+        await saveServicosOficina(configOficina, newList);
+        setSaveStatus('saved');
+        setTimeout(() => setSaveStatus('idle'), 2000);
     };
 
     // Função auxiliar para calcular HH de um registro
@@ -295,14 +276,17 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
                             </div>
                         </div>
 
-                        <div className="p-6 border-t border-slate-100 bg-white flex justify-end space-x-3">
+                        <div className="p-6 border-t border-slate-100 bg-white flex justify-between items-center">
+                            <div className="flex items-center space-x-2 text-[10px] uppercase tracking-widest font-bold text-slate-400">
+                                {saveStatus === 'saving' && <><Loader2 size={12} className="animate-spin text-indigo-500" /> <span className="text-indigo-500">Salvando...</span></>}
+                                {saveStatus === 'saved' && <><CheckCircle2 size={12} className="text-emerald-500" /> <span className="text-emerald-500">Salvo!</span></>}
+                                {saveStatus === 'idle' && <span>Salva automaticamente</span>}
+                            </div>
                             <button
-                                onClick={handleSaveConfig}
-                                disabled={savingConfig || loadingConfig}
-                                className="flex items-center space-x-2 bg-emerald-500 text-white px-6 py-3 rounded-xl text-sm font-bold hover:bg-emerald-600 transition-all disabled:opacity-50 shadow-lg shadow-emerald-100"
+                                onClick={() => setShowSettings(false)}
+                                className="bg-slate-100 text-slate-600 px-6 py-3 rounded-xl text-sm font-bold hover:bg-slate-200 transition-all"
                             >
-                                {savingConfig ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                                <span>Salvar Configurações</span>
+                                Fechar
                             </button>
                         </div>
                     </div>

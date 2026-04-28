@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, HardHat, Calendar, FileText, Ship, Send, Loader2, X, Check, HelpCircle, Plus, Minus, Tag } from 'lucide-react';
 import { ApontamentoHH } from '../types';
-import { supabase } from '../services/supabase';
+import { loadServicosOficina } from '../services/servicosStorage';
 
 interface ApontamentoFormProps {
     oficinas: string[];
@@ -39,16 +39,8 @@ const ApontamentoForm: React.FC<ApontamentoFormProps> = ({ oficinas, onSave, onC
     const loadServicos = async (oficinaName: string) => {
         setLoadingServicos(true);
         try {
-            const { data, error } = await supabase
-                .from('oficina_servicos')
-                .select('servicos')
-                .eq('oficina', oficinaName)
-                .single();
-            if (data && !error && data.servicos) {
-                setAvailableServicos(data.servicos);
-            } else {
-                setAvailableServicos([]);
-            }
+            const servicos = await loadServicosOficina(oficinaName);
+            setAvailableServicos(servicos);
         } catch (err) {
             setAvailableServicos([]);
         } finally {

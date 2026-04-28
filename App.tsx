@@ -365,10 +365,17 @@ const App: React.FC = () => {
 
   const handleSaveApontamento = async (apontamento: ApontamentoHH) => {
     try {
+      // Como a coluna 'tipo_servico' não existe no banco, concatenamos para não perder a informação e evitar erro de SQL
+      const { tipo_servico, ...apontamentoDb } = apontamento;
+      const servicoFinal = tipo_servico 
+        ? `[${tipo_servico.toUpperCase()}] ${apontamentoDb.servico}`
+        : apontamentoDb.servico;
+
       const { error } = await supabase
         .from('apontamento_hh')
         .insert([{
-          ...apontamento,
+          ...apontamentoDb,
+          servico: servicoFinal,
           created_at: new Date().toISOString()
         }]);
 
