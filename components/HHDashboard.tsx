@@ -347,6 +347,17 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
                                             
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div className="col-span-2">
+                                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Tipo de Serviço</label>
+                                                    <select
+                                                        value={editingHH.tipo_servico || ''}
+                                                        onChange={(e) => setEditingHH({ ...editingHH, tipo_servico: e.target.value })}
+                                                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm appearance-none cursor-pointer"
+                                                    >
+                                                        <option value="">Nenhum / Não classificado</option>
+                                                        {servicosList.map(s => <option key={s} value={s}>{s}</option>)}
+                                                    </select>
+                                                </div>
+                                                <div className="col-span-2">
                                                     <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Serviço/Descrição</label>
                                                     <input
                                                         type="text"
