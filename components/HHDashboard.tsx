@@ -5,7 +5,7 @@ import {
 } from 'recharts';
 import {
     TrendingUp, HardHat, Clock, BarChart3,
-    ArrowLeft, Users, Zap, LayoutDashboard, Calendar, Filter, X, Settings, Loader2, Save, Plus, Trash2, CheckCircle2
+    ArrowLeft, Users, Zap, LayoutDashboard, Calendar, Filter, X, Settings, Loader2, Save, Plus, Trash2, CheckCircle2, Edit2
 } from 'lucide-react';
 import { ApontamentoHH } from '../types';
 import { KPICard } from './KPICard';
@@ -22,9 +22,11 @@ interface HHDashboardProps {
     loading: boolean;
     oficinas: string[];
     onBack: () => void;
+    onDeleteApontamento?: (id: string) => Promise<void>;
+    onUpdateApontamento?: (apontamento: ApontamentoHH) => Promise<void>;
 }
 
-const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBack }) => {
+const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBack, onDeleteApontamento, onUpdateApontamento }) => {
     const [filters, setFilters] = useState<HHDashboardFilters>({
         startDate: '',
         endDate: '',
@@ -39,6 +41,38 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
     const [loadingConfig, setLoadingConfig] = useState(false);
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
     const [localNotification, setLocalNotification] = useState<string | null>(null);
+
+    // --- Tabs & Edit HH ---
+    const [activeTab, setActiveTab] = useState<'servicos' | 'apontamentos'>('servicos');
+    const [editingHH, setEditingHH] = useState<ApontamentoHH | null>(null);
+
+    const apontamentosOficina = useMemo(() => {
+        return data.filter(d => d.oficina === configOficina).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
+    }, [data, configOficina]);
+
+    const handleConfirmDeleteHH = async (id: string) => {
+        if (window.confirm("Deseja realmente excluir este apontamento?")) {
+            if (onDeleteApontamento) {
+                await onDeleteApontamento(id);
+                setLocalNotification("Apontamento excluído!");
+                setTimeout(() => setLocalNotification(null), 3000);
+            }
+        }
+    };
+
+    const handleSaveEditHH = async () => {
+        if (editingHH && onUpdateApontamento) {
+            setSaveStatus('saving');
+            await onUpdateApontamento(editingHH);
+            setSaveStatus('saved');
+            setLocalNotification("Apontamento atualizado!");
+            setTimeout(() => {
+                setLocalNotification(null);
+                setSaveStatus('idle');
+                setEditingHH(null);
+            }, 2000);
+        }
+    };
 
     // Fetch config when modal opens or oficina changes
     useEffect(() => {
@@ -198,15 +232,15 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
             {showSettings && (
                 <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setShowSettings(false)}></div>
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg relative z-10 overflow-hidden flex flex-col max-h-[90vh]">
-                        <div className="bg-slate-50 p-6 border-b border-slate-100 flex justify-between items-center">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl relative z-10 overflow-hidden flex flex-col max-h-[90vh]">
+                        <div className="bg-slate-50 p-6 border-b border-slate-100 flex justify-between items-center shrink-0">
                             <div className="flex items-center space-x-3">
                                 <div className="bg-indigo-100 w-10 h-10 rounded-xl flex items-center justify-center text-indigo-600">
                                     <Settings size={20} />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-slate-800">Tipos de Serviço</h3>
-                                    <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Configuração por Oficina</p>
+                                    <h3 className="font-bold text-slate-800">Gerenciamento de Oficina</h3>
+                                    <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Configuração e Dados</p>
                                 </div>
                             </div>
                             <button onClick={() => setShowSettings(false)} className="text-slate-400 hover:text-slate-600 transition-colors p-2 rounded-full hover:bg-slate-200">
@@ -214,80 +248,217 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
                             </button>
                         </div>
                         
-                        <div className="p-6 flex-1 overflow-y-auto space-y-6">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Oficina Selecionada</label>
+                        {/* Selector & Tabs */}
+                        <div className="px-6 pt-4 border-b border-slate-100 flex flex-col space-y-4 shrink-0 bg-white">
+                            <div className="flex items-center space-x-4">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest shrink-0">Oficina</label>
                                 <select
-                                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer"
+                                    className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer"
                                     value={configOficina}
-                                    onChange={(e) => setConfigOficina(e.target.value)}
+                                    onChange={(e) => {
+                                        setConfigOficina(e.target.value);
+                                        setEditingHH(null);
+                                    }}
                                 >
                                     {oficinas.map(o => <option key={o} value={o}>{o}</option>)}
                                 </select>
                             </div>
-
-                            <div className="space-y-4">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Gerenciar Serviços</label>
-                                
-                                <div className="flex space-x-2">
-                                    <input
-                                        type="text"
-                                        placeholder="Novo tipo de serviço..."
-                                        className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-                                        value={newServico}
-                                        onChange={(e) => setNewServico(e.target.value)}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                                e.preventDefault();
-                                                handleAddServico();
-                                            }
-                                        }}
-                                    />
-                                    <button
-                                        onClick={handleAddServico}
-                                        disabled={!newServico.trim()}
-                                        className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors disabled:opacity-50"
-                                    >
-                                        <Plus size={20} />
-                                    </button>
-                                </div>
-
-                                <div className="bg-slate-50 rounded-xl border border-slate-200 divide-y divide-slate-100 max-h-60 overflow-y-auto custom-scrollbar">
-                                    {loadingConfig ? (
-                                        <div className="p-8 flex justify-center text-indigo-500">
-                                            <Loader2 size={24} className="animate-spin" />
-                                        </div>
-                                    ) : servicosList.length === 0 ? (
-                                        <div className="p-6 text-center text-sm text-slate-400 italic">
-                                            Nenhum serviço cadastrado para esta oficina.
-                                        </div>
-                                    ) : (
-                                        servicosList.map(s => (
-                                            <div key={s} className="px-4 py-3 flex items-center justify-between hover:bg-slate-100/50 transition-colors">
-                                                <span className="text-sm font-bold text-slate-700">{s}</span>
-                                                <button
-                                                    onClick={() => handleRemoveServico(s)}
-                                                    className="text-slate-300 hover:text-red-500 transition-colors p-1"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
+                            
+                            <div className="flex space-x-4">
+                                <button 
+                                    className={`pb-2 px-1 text-sm font-bold border-b-2 transition-colors ${activeTab === 'servicos' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}
+                                    onClick={() => { setActiveTab('servicos'); setEditingHH(null); }}
+                                >
+                                    Tipos de Serviço
+                                </button>
+                                <button 
+                                    className={`pb-2 px-1 text-sm font-bold border-b-2 transition-colors ${activeTab === 'apontamentos' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}
+                                    onClick={() => setActiveTab('apontamentos')}
+                                >
+                                    Apontamentos Realizados
+                                </button>
                             </div>
                         </div>
 
-                        <div className="p-6 border-t border-slate-100 bg-white flex justify-end space-x-3">
-                            <button
-                                onClick={handleSaveConfig}
-                                disabled={saveStatus === 'saving' || loadingConfig}
-                                className="flex items-center space-x-2 bg-emerald-500 text-white px-6 py-3 rounded-xl text-sm font-bold hover:bg-emerald-600 transition-all disabled:opacity-50 shadow-lg shadow-emerald-100"
-                            >
-                                {saveStatus === 'saving' ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                                <span>Salvar Configurações</span>
-                            </button>
+                        <div className="flex-1 overflow-y-auto bg-slate-50/50 p-6 custom-scrollbar">
+                            {activeTab === 'servicos' && (
+                                <div className="space-y-4">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Gerenciar Serviços</label>
+                                    
+                                    <div className="flex space-x-2">
+                                        <input
+                                            type="text"
+                                            placeholder="Novo tipo de serviço..."
+                                            className="flex-1 px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                                            value={newServico}
+                                            onChange={(e) => setNewServico(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    handleAddServico();
+                                                }
+                                            }}
+                                        />
+                                        <button
+                                            onClick={handleAddServico}
+                                            disabled={!newServico.trim()}
+                                            className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                                        >
+                                            <Plus size={20} />
+                                        </button>
+                                    </div>
+
+                                    <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100 max-h-60 overflow-y-auto custom-scrollbar">
+                                        {loadingConfig ? (
+                                            <div className="p-8 flex justify-center text-indigo-500">
+                                                <Loader2 size={24} className="animate-spin" />
+                                            </div>
+                                        ) : servicosList.length === 0 ? (
+                                            <div className="p-6 text-center text-sm text-slate-400 italic">
+                                                Nenhum serviço cadastrado para esta oficina.
+                                            </div>
+                                        ) : (
+                                            servicosList.map(s => (
+                                                <div key={s} className="px-4 py-3 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                                                    <span className="text-sm font-bold text-slate-700">{s}</span>
+                                                    <button
+                                                        onClick={() => handleRemoveServico(s)}
+                                                        className="text-slate-300 hover:text-red-500 transition-colors p-1"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'apontamentos' && (
+                                <div className="space-y-4">
+                                    {editingHH ? (
+                                        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+                                            <div className="flex justify-between items-center mb-2">
+                                                <h4 className="font-bold text-slate-800 text-sm">Editar Apontamento</h4>
+                                                <button onClick={() => setEditingHH(null)} className="text-slate-400 hover:text-slate-600">
+                                                    <X size={18} />
+                                                </button>
+                                            </div>
+                                            
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="col-span-2">
+                                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Serviço/Descrição</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editingHH.servico}
+                                                        onChange={(e) => setEditingHH({ ...editingHH, servico: e.target.value })}
+                                                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Data</label>
+                                                    <input
+                                                        type="date"
+                                                        value={editingHH.data}
+                                                        onChange={(e) => setEditingHH({ ...editingHH, data: e.target.value })}
+                                                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Qtd Militares</label>
+                                                    <input
+                                                        type="number"
+                                                        min="1"
+                                                        value={editingHH.qtd_militares}
+                                                        onChange={(e) => setEditingHH({ ...editingHH, qtd_militares: parseInt(e.target.value) || 1 })}
+                                                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Hora Início</label>
+                                                    <input
+                                                        type="time"
+                                                        value={editingHH.inicio}
+                                                        onChange={(e) => setEditingHH({ ...editingHH, inicio: e.target.value })}
+                                                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Hora Fim</label>
+                                                    <input
+                                                        type="time"
+                                                        value={editingHH.fim}
+                                                        onChange={(e) => setEditingHH({ ...editingHH, fim: e.target.value })}
+                                                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"
+                                                    />
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex justify-end pt-2">
+                                                <button
+                                                    onClick={handleSaveEditHH}
+                                                    disabled={saveStatus === 'saving'}
+                                                    className="bg-indigo-600 text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-indigo-700 flex items-center space-x-2"
+                                                >
+                                                    {saveStatus === 'saving' ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                                                    <span>Salvar Alterações</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100 max-h-96 overflow-y-auto custom-scrollbar">
+                                            {apontamentosOficina.length === 0 ? (
+                                                <div className="p-6 text-center text-sm text-slate-400 italic">
+                                                    Nenhum apontamento encontrado.
+                                                </div>
+                                            ) : (
+                                                apontamentosOficina.map(ap => (
+                                                    <div key={ap.id} className="p-4 flex justify-between items-start hover:bg-slate-50 transition-colors group">
+                                                        <div className="flex-1 min-w-0 pr-4">
+                                                            <div className="flex items-center space-x-2 mb-1">
+                                                                <span className="text-[10px] font-black bg-slate-100 text-slate-500 px-2 py-0.5 rounded uppercase">{new Date(ap.data + 'T12:00:00').toLocaleDateString('pt-BR')}</span>
+                                                                <span className="text-[10px] font-black text-indigo-500">{ap.inicio} às {ap.fim}</span>
+                                                                <span className="text-[10px] font-bold text-slate-400">({ap.qtd_militares} militar{ap.qtd_militares > 1 ? 'es' : ''})</span>
+                                                            </div>
+                                                            <p className="text-sm font-bold text-slate-700 truncate">{ap.servico}</p>
+                                                        </div>
+                                                        <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                                                            <button
+                                                                onClick={() => setEditingHH(ap)}
+                                                                className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                                                title="Editar"
+                                                            >
+                                                                <Edit2 size={16} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => ap.id && handleConfirmDeleteHH(ap.id)}
+                                                                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                                title="Excluir"
+                                                            >
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
+
+                        {activeTab === 'servicos' && (
+                            <div className="p-6 border-t border-slate-100 bg-white flex justify-end space-x-3 shrink-0">
+                                <button
+                                    onClick={handleSaveConfig}
+                                    disabled={saveStatus === 'saving' || loadingConfig}
+                                    className="flex items-center space-x-2 bg-emerald-500 text-white px-6 py-3 rounded-xl text-sm font-bold hover:bg-emerald-600 transition-all disabled:opacity-50 shadow-lg shadow-emerald-100"
+                                >
+                                    {saveStatus === 'saving' ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                                    <span>Salvar Configurações</span>
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

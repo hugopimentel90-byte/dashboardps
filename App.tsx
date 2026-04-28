@@ -383,9 +383,58 @@ const App: React.FC = () => {
 
       setNotification({ message: "Apontamento salvo com sucesso!", type: 'success' });
       setCurrentView('dashboard');
+      await loadHHData();
     } catch (error) {
       console.error("Erro ao salvar apontamento:", error);
       setNotification({ message: "Erro ao salvar apontamento.", type: 'error' });
+    }
+  };
+
+  const handleDeleteApontamento = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('apontamento_hh')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      setNotification({ message: "Apontamento excluído com sucesso!", type: 'success' });
+      await loadHHData();
+    } catch (error) {
+      console.error("Erro ao excluir apontamento:", error);
+      setNotification({ message: "Erro ao excluir apontamento.", type: 'error' });
+    }
+  };
+
+  const handleUpdateApontamento = async (apontamento: ApontamentoHH) => {
+    try {
+      if (!apontamento.id) throw new Error("ID não fornecido");
+      
+      // Preserva a lógica de salvar com o tipo_servico no texto para não quebrar o schema
+      const { tipo_servico, ...apontamentoDb } = apontamento;
+      let servicoFinal = apontamentoDb.servico;
+      
+      // Só concatena se o tipo_servico já não estiver no texto e houver um tipo
+      if (tipo_servico && !servicoFinal.includes(`[${tipo_servico.toUpperCase()}]`)) {
+          servicoFinal = `[${tipo_servico.toUpperCase()}] ${apontamentoDb.servico}`;
+      }
+
+      const { error } = await supabase
+        .from('apontamento_hh')
+        .update({
+          ...apontamentoDb,
+          servico: servicoFinal
+        })
+        .eq('id', apontamento.id);
+
+      if (error) throw error;
+
+      setNotification({ message: "Apontamento atualizado com sucesso!", type: 'success' });
+      await loadHHData();
+    } catch (error) {
+      console.error("Erro ao atualizar apontamento:", error);
+      setNotification({ message: "Erro ao atualizar apontamento.", type: 'error' });
     }
   };
 
@@ -762,6 +811,8 @@ const App: React.FC = () => {
             loading={loadingHH}
             oficinas={oficinas}
             onBack={() => setCurrentView('dashboard')}
+            onDeleteApontamento={handleDeleteApontamento}
+            onUpdateApontamento={handleUpdateApontamento}
           />
         </main>
       </div>
