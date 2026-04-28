@@ -5,7 +5,7 @@ import {
 } from 'recharts';
 import {
     TrendingUp, HardHat, Clock, BarChart3,
-    ArrowLeft, Users, Zap, LayoutDashboard, Calendar, Filter, X, Settings, Loader2, Plus, Trash2, CheckCircle2
+    ArrowLeft, Users, Zap, LayoutDashboard, Calendar, Filter, X, Settings, Loader2, Save, Plus, Trash2, CheckCircle2
 } from 'lucide-react';
 import { ApontamentoHH } from '../types';
 import { KPICard } from './KPICard';
@@ -38,6 +38,7 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
     const [newServico, setNewServico] = useState('');
     const [loadingConfig, setLoadingConfig] = useState(false);
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+    const [localNotification, setLocalNotification] = useState<string | null>(null);
 
     // Fetch config when modal opens or oficina changes
     useEffect(() => {
@@ -59,25 +60,26 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
         }
     };
 
-    const handleAddServico = async () => {
+    const handleAddServico = () => {
         if (newServico.trim() && !servicosList.includes(newServico.trim())) {
-            setSaveStatus('saving');
-            const newList = [...servicosList, newServico.trim()];
-            setServicosList(newList);
+            setServicosList([...servicosList, newServico.trim()]);
             setNewServico('');
-            await saveServicosOficina(configOficina, newList);
-            setSaveStatus('saved');
-            setTimeout(() => setSaveStatus('idle'), 2000);
         }
     };
 
-    const handleRemoveServico = async (servico: string) => {
+    const handleRemoveServico = (servico: string) => {
+        setServicosList(servicosList.filter(s => s !== servico));
+    };
+
+    const handleSaveConfig = async () => {
         setSaveStatus('saving');
-        const newList = servicosList.filter(s => s !== servico);
-        setServicosList(newList);
-        await saveServicosOficina(configOficina, newList);
+        await saveServicosOficina(configOficina, servicosList);
         setSaveStatus('saved');
-        setTimeout(() => setSaveStatus('idle'), 2000);
+        setLocalNotification("Serviços cadastrados com sucesso no banco de dados!");
+        setTimeout(() => {
+            setLocalNotification(null);
+            setSaveStatus('idle');
+        }, 3000);
     };
 
     // Função auxiliar para calcular HH de um registro
@@ -276,20 +278,25 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
                             </div>
                         </div>
 
-                        <div className="p-6 border-t border-slate-100 bg-white flex justify-between items-center">
-                            <div className="flex items-center space-x-2 text-[10px] uppercase tracking-widest font-bold text-slate-400">
-                                {saveStatus === 'saving' && <><Loader2 size={12} className="animate-spin text-indigo-500" /> <span className="text-indigo-500">Salvando...</span></>}
-                                {saveStatus === 'saved' && <><CheckCircle2 size={12} className="text-emerald-500" /> <span className="text-emerald-500">Salvo!</span></>}
-                                {saveStatus === 'idle' && <span>Salva automaticamente</span>}
-                            </div>
+                        <div className="p-6 border-t border-slate-100 bg-white flex justify-end space-x-3">
                             <button
-                                onClick={() => setShowSettings(false)}
-                                className="bg-slate-100 text-slate-600 px-6 py-3 rounded-xl text-sm font-bold hover:bg-slate-200 transition-all"
+                                onClick={handleSaveConfig}
+                                disabled={saveStatus === 'saving' || loadingConfig}
+                                className="flex items-center space-x-2 bg-emerald-500 text-white px-6 py-3 rounded-xl text-sm font-bold hover:bg-emerald-600 transition-all disabled:opacity-50 shadow-lg shadow-emerald-100"
                             >
-                                Fechar
+                                {saveStatus === 'saving' ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                                <span>Salvar Configurações</span>
                             </button>
                         </div>
                     </div>
+                </div>
+            )}
+
+            {/* Notificação Local */}
+            {localNotification && (
+                <div className="fixed top-4 right-4 z-[300] bg-emerald-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center space-x-3 animate-in slide-in-from-top-4 fade-in duration-300">
+                    <CheckCircle2 size={24} />
+                    <span className="font-bold">{localNotification}</span>
                 </div>
             )}
 
