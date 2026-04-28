@@ -1,15 +1,15 @@
-
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     AreaChart, Area, Cell, Legend
 } from 'recharts';
 import {
     TrendingUp, HardHat, Clock, BarChart3,
-    ArrowLeft, Users, Zap, LayoutDashboard, Calendar, Filter, X
+    ArrowLeft, Users, Zap, LayoutDashboard, Calendar, Filter, X, Settings, Loader2, Save, Plus, Trash2
 } from 'lucide-react';
 import { ApontamentoHH } from '../types';
 import { KPICard } from './KPICard';
+import { supabase } from '../services/supabase';
 
 interface HHDashboardFilters {
     startDate: string;
@@ -30,6 +30,74 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
         endDate: '',
         oficina: 'TODAS'
     });
+
+    // --- Modal Configuration State ---
+    const [showSettings, setShowSettings] = useState(false);
+    const [configOficina, setConfigOficina] = useState(oficinas[0] || '');
+    const [servicosList, setServicosList] = useState<string[]>([]);
+    const [newServico, setNewServico] = useState('');
+    const [loadingConfig, setLoadingConfig] = useState(false);
+    const [savingConfig, setSavingConfig] = useState(false);
+
+    // Fetch config when modal opens or oficina changes
+    useEffect(() => {
+        if (showSettings && configOficina) {
+            loadConfigOficina(configOficina);
+        }
+    }, [showSettings, configOficina]);
+
+    const loadConfigOficina = async (oficinaName: string) => {
+        setLoadingConfig(true);
+        try {
+            const { data, error } = await supabase
+                .from('oficina_servicos')
+                .select('servicos')
+                .eq('oficina', oficinaName)
+                .single();
+
+            if (data && !error) {
+                setServicosList(data.servicos || []);
+            } else {
+                setServicosList([]);
+            }
+        } catch (err) {
+            console.error("Erro ao carregar serviços da oficina", err);
+            setServicosList([]);
+        } finally {
+            setLoadingConfig(false);
+        }
+    };
+
+    const handleSaveConfig = async () => {
+        setSavingConfig(true);
+        try {
+            const { error } = await supabase
+                .from('oficina_servicos')
+                .upsert({
+                    oficina: configOficina,
+                    servicos: servicosList,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'oficina' });
+
+            if (error) throw error;
+            // Poderia adicionar uma notificação de sucesso aqui
+        } catch (err) {
+            console.error("Erro ao salvar", err);
+        } finally {
+            setSavingConfig(false);
+        }
+    };
+
+    const handleAddServico = () => {
+        if (newServico.trim() && !servicosList.includes(newServico.trim())) {
+            setServicosList([...servicosList, newServico.trim()]);
+            setNewServico('');
+        }
+    };
+
+    const handleRemoveServico = (servico: string) => {
+        setServicosList(servicosList.filter(s => s !== servico));
+    };
 
     // Função auxiliar para calcular HH de um registro
     const calculateHH = (item: ApontamentoHH) => {
@@ -142,7 +210,105 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
     };
 
     return (
-        <div className="space-y-8 animate-fade-in">
+        <div className="space-y-8 animate-fade-in relative">
+            {/* Modal de Configuração de Serviços */}
+            {showSettings && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setShowSettings(false)}></div>
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg relative z-10 overflow-hidden flex flex-col max-h-[90vh]">
+                        <div className="bg-slate-50 p-6 border-b border-slate-100 flex justify-between items-center">
+                            <div className="flex items-center space-x-3">
+                                <div className="bg-indigo-100 w-10 h-10 rounded-xl flex items-center justify-center text-indigo-600">
+                                    <Settings size={20} />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-slate-800">Tipos de Serviço</h3>
+                                    <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Configuração por Oficina</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setShowSettings(false)} className="text-slate-400 hover:text-slate-600 transition-colors p-2 rounded-full hover:bg-slate-200">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        
+                        <div className="p-6 flex-1 overflow-y-auto space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Oficina Selecionada</label>
+                                <select
+                                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer"
+                                    value={configOficina}
+                                    onChange={(e) => setConfigOficina(e.target.value)}
+                                >
+                                    {oficinas.map(o => <option key={o} value={o}>{o}</option>)}
+                                </select>
+                            </div>
+
+                            <div className="space-y-4">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Gerenciar Serviços</label>
+                                
+                                <div className="flex space-x-2">
+                                    <input
+                                        type="text"
+                                        placeholder="Novo tipo de serviço..."
+                                        className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                                        value={newServico}
+                                        onChange={(e) => setNewServico(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                handleAddServico();
+                                            }
+                                        }}
+                                    />
+                                    <button
+                                        onClick={handleAddServico}
+                                        disabled={!newServico.trim()}
+                                        className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                                    >
+                                        <Plus size={20} />
+                                    </button>
+                                </div>
+
+                                <div className="bg-slate-50 rounded-xl border border-slate-200 divide-y divide-slate-100 max-h-60 overflow-y-auto custom-scrollbar">
+                                    {loadingConfig ? (
+                                        <div className="p-8 flex justify-center text-indigo-500">
+                                            <Loader2 size={24} className="animate-spin" />
+                                        </div>
+                                    ) : servicosList.length === 0 ? (
+                                        <div className="p-6 text-center text-sm text-slate-400 italic">
+                                            Nenhum serviço cadastrado para esta oficina.
+                                        </div>
+                                    ) : (
+                                        servicosList.map(s => (
+                                            <div key={s} className="px-4 py-3 flex items-center justify-between hover:bg-slate-100/50 transition-colors">
+                                                <span className="text-sm font-bold text-slate-700">{s}</span>
+                                                <button
+                                                    onClick={() => handleRemoveServico(s)}
+                                                    className="text-slate-300 hover:text-red-500 transition-colors p-1"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-6 border-t border-slate-100 bg-white flex justify-end space-x-3">
+                            <button
+                                onClick={handleSaveConfig}
+                                disabled={savingConfig || loadingConfig}
+                                className="flex items-center space-x-2 bg-emerald-500 text-white px-6 py-3 rounded-xl text-sm font-bold hover:bg-emerald-600 transition-all disabled:opacity-50 shadow-lg shadow-emerald-100"
+                            >
+                                {savingConfig ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                                <span>Salvar Configurações</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Header Info & Filters */}
             <div className="flex flex-col sm:flex-row lg:flex-row sm:items-center justify-between gap-4 md:gap-6">
                 <div className="flex-1 min-w-0">
@@ -196,9 +362,19 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
                     )}
                 </div>
 
-                <div className="bg-indigo-50 text-indigo-700 px-3 md:px-4 py-1.5 md:py-2 rounded-2xl border border-indigo-100 flex items-center space-x-2 self-start sm:self-center shrink-0">
-                    <Clock size={16} />
-                    <span className="font-black text-[10px] md:text-sm whitespace-nowrap">{metrics.totalHH.toFixed(1)} HH SELECIONADOS</span>
+                <div className="flex items-center space-x-2 self-start sm:self-center shrink-0">
+                    <div className="bg-indigo-50 text-indigo-700 px-3 md:px-4 py-1.5 md:py-2 rounded-2xl border border-indigo-100 flex items-center space-x-2">
+                        <Clock size={16} />
+                        <span className="font-black text-[10px] md:text-sm whitespace-nowrap">{metrics.totalHH.toFixed(1)} HH SELECIONADOS</span>
+                    </div>
+                    
+                    <button
+                        onClick={() => setShowSettings(true)}
+                        className="bg-white p-1.5 md:p-2 rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-50 hover:text-indigo-600 transition-colors text-slate-400 flex items-center justify-center"
+                        title="Configurar Serviços por Oficina"
+                    >
+                        <Settings size={20} />
+                    </button>
                 </div>
             </div>
 
@@ -376,7 +552,10 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
                                     return (
                                         <tr key={idx} className="text-sm hover:bg-slate-50 transition-colors">
                                             <td className="py-4 px-4 font-bold text-slate-600">{new Date(item.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
-                                            <td className="py-4 px-4 text-slate-700 font-medium">{item.servico}</td>
+                                            <td className="py-4 px-4 text-slate-700 font-medium flex flex-col">
+                                                <span>{item.servico}</span>
+                                                {item.tipo_servico && <span className="text-[10px] text-indigo-500 font-bold uppercase mt-0.5">{item.tipo_servico}</span>}
+                                            </td>
                                             <td className="py-4 px-4">
                                                 <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded-lg text-[10px] font-black uppercase">{item.oficina}</span>
                                             </td>

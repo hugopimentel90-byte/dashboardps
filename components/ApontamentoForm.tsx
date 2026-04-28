@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Clock, HardHat, Calendar, FileText, Ship, Send, Loader2, X, Check, HelpCircle, Plus, Minus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Clock, HardHat, Calendar, FileText, Ship, Send, Loader2, X, Check, HelpCircle, Plus, Minus, Tag } from 'lucide-react';
 import { ApontamentoHH } from '../types';
+import { supabase } from '../services/supabase';
 
 interface ApontamentoFormProps {
     oficinas: string[];
@@ -11,14 +12,49 @@ interface ApontamentoFormProps {
 const ApontamentoForm: React.FC<ApontamentoFormProps> = ({ oficinas, onSave, onCancel }) => {
     const [formData, setFormData] = useState<ApontamentoHH>({
         servico: '',
+        tipo_servico: '',
         oficina: '',
         data: new Date().toISOString().split('T')[0],
         inicio: '',
         fim: '',
         qtd_militares: 1
     });
+    
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
+
+    // Estado para tipos de serviço configurados
+    const [availableServicos, setAvailableServicos] = useState<string[]>([]);
+    const [loadingServicos, setLoadingServicos] = useState(false);
+
+    useEffect(() => {
+        if (formData.oficina) {
+            loadServicos(formData.oficina);
+        } else {
+            setAvailableServicos([]);
+            setFormData(prev => ({ ...prev, tipo_servico: '' }));
+        }
+    }, [formData.oficina]);
+
+    const loadServicos = async (oficinaName: string) => {
+        setLoadingServicos(true);
+        try {
+            const { data, error } = await supabase
+                .from('oficina_servicos')
+                .select('servicos')
+                .eq('oficina', oficinaName)
+                .single();
+            if (data && !error && data.servicos) {
+                setAvailableServicos(data.servicos);
+            } else {
+                setAvailableServicos([]);
+            }
+        } catch (err) {
+            setAvailableServicos([]);
+        } finally {
+            setLoadingServicos(false);
+        }
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -30,7 +66,6 @@ const ApontamentoForm: React.FC<ApontamentoFormProps> = ({ oficinas, onSave, onC
         setShowConfirm(false);
         try {
             await onSave(formData);
-            // Reset form on success if needed, but App.tsx might handle view change
         } catch (error) {
             console.error("Erro no formulário:", error);
         } finally {
@@ -58,6 +93,11 @@ const ApontamentoForm: React.FC<ApontamentoFormProps> = ({ oficinas, onSave, onC
                                 <div>
                                     <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Serviço</span>
                                     <span className="text-xs font-bold text-slate-700 line-clamp-2">{formData.servico}</span>
+                                    {formData.tipo_servico && (
+                                        <span className="inline-block mt-1 bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase">
+                                            {formData.tipo_servico}
+                                        </span>
+                                    )}
                                 </div>
                                 <div className="grid grid-cols-2 gap-3 md:gap-4 pt-3 border-t border-slate-100">
                                     <div>
@@ -103,19 +143,7 @@ const ApontamentoForm: React.FC<ApontamentoFormProps> = ({ oficinas, onSave, onC
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6">
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
-                            <FileText size={14} className="mr-2" /> Serviço Realizado
-                        </label>
-                        <textarea
-                            required
-                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all min-h-[100px] resize-none"
-                            placeholder="Descreva detalhadamente o serviço..."
-                            value={formData.servico}
-                            onChange={(e) => setFormData({ ...formData, servico: e.target.value })}
-                        />
-                    </div>
-
+                    
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
@@ -143,6 +171,48 @@ const ApontamentoForm: React.FC<ApontamentoFormProps> = ({ oficinas, onSave, onC
                                 value={formData.data}
                                 onChange={(e) => setFormData({ ...formData, data: e.target.value })}
                             />
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
+                            <FileText size={14} className="mr-2" /> Serviço Realizado (Descrição)
+                        </label>
+                        <textarea
+                            required
+                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all min-h-[100px] resize-none"
+                            placeholder="Descreva detalhadamente o serviço..."
+                            value={formData.servico}
+                            onChange={(e) => setFormData({ ...formData, servico: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-2 relative">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
+                            <Tag size={14} className="mr-2" /> Tipo de Serviço
+                        </label>
+                        <div className="relative">
+                            <select
+                                required
+                                disabled={!formData.oficina || availableServicos.length === 0}
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none appearance-none cursor-pointer disabled:opacity-50"
+                                value={formData.tipo_servico || ''}
+                                onChange={(e) => setFormData({ ...formData, tipo_servico: e.target.value })}
+                            >
+                                <option value="">
+                                    {!formData.oficina 
+                                        ? "Selecione uma oficina primeiro..." 
+                                        : availableServicos.length === 0 
+                                            ? "Nenhum tipo cadastrado para esta oficina" 
+                                            : "Selecione o tipo de serviço"}
+                                </option>
+                                {availableServicos.map(s => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                            {loadingServicos && (
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                                    <Loader2 size={16} className="animate-spin text-indigo-500" />
+                                </div>
+                            )}
                         </div>
                     </div>
 

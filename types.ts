@@ -48,10 +48,16 @@ export interface KPIStats {
 export interface ApontamentoHH {
   id?: string;
   servico: string;
+  tipo_servico?: string;
   oficina: string;
   data: string;
   inicio: string;
   fim: string;
   qtd_militares: number;
   created_at?: string;
+}
+
+export interface OficinaServicos {
+  oficina: string;
+  servicos: string[];
 }
