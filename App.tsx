@@ -225,7 +225,7 @@ const App: React.FC = () => {
     const orcamentoOrganico = filteredData.filter(i => {
       const ts = i.tipoServico?.toLowerCase().trim();
       return ts === "orgânico" || ts === "organico";
-    }).reduce((acc, curr) => acc + (curr.txOmps || 0), 0);
+    }).reduce((acc, curr) => acc + (curr.valorOrcamento || 0), 0);
 
     return {
       totalPS, totalBudget, avgLeadTime: avgEnvioOficina, pendingCount, completedCount,
