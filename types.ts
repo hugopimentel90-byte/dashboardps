@@ -43,6 +43,7 @@ export interface KPIStats {
   totalTerceirizado: number;
   avgEnvioOficina: number;
   avgAguIndRec: number;
+  orcamentoOrganico: number;
 }
 
 export interface ApontamentoHH {
