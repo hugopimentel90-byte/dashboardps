@@ -230,7 +230,7 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
         <div className="space-y-8 animate-fade-in relative">
             {/* Modal de Configuração de Serviços */}
             {showSettings && (
-                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[200] flex items-start justify-center p-4 pt-10 md:pt-16">
                     <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setShowSettings(false)}></div>
                     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl relative z-10 overflow-hidden flex flex-col max-h-[90vh]">
                         <div className="bg-slate-50 p-6 border-b border-slate-100 flex justify-between items-center shrink-0">
