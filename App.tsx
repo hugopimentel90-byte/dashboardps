@@ -9,7 +9,7 @@ import {
   RefreshCcw, TrendingUp, DollarSign, Clock, CheckCircle2,
   AlertCircle, HardHat, FileText, Settings, UserCheck, Timer, Lock,
   Construction, Download, ArrowLeft, Mail, Send, Check, RotateCcw,
-  Loader2, Save, X, Info, Copy, HelpCircle, Menu, ChevronDown, ChevronUp, Eye, EyeOff
+  Loader2, Save, X, Info, Copy, HelpCircle, Menu, ChevronDown, ChevronUp, Eye, EyeOff, BarChart3
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -258,6 +258,16 @@ const App: React.FC = () => {
       counts[item.status] = (counts[item.status] || 0) + 1;
     });
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
+  }, [filteredData]);
+
+  const psPorOficinaData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    filteredData.forEach(item => {
+      counts[item.oficina] = (counts[item.oficina] || 0) + 1;
+    });
+    return Object.entries(counts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
   }, [filteredData]);
 
   const handleSendEmail = async (item: ServiceOrder) => {
@@ -1202,6 +1212,30 @@ const App: React.FC = () => {
                   <Tooltip />
                   <Legend verticalAlign="bottom" align="center" wrapperStyle={{ fontSize: '10px' }} />
                 </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </section>
+
+        {/* PS por Oficina */}
+        <section className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 h-[350px] md:h-[450px] hover-card">
+            <h3 className="font-bold text-slate-800 mb-6 md:mb-8 flex items-center space-x-2">
+              <BarChart3 size={20} className="text-emerald-500" />
+              <span>PS por Oficina</span>
+            </h3>
+            <div className="h-[220px] md:h-[320px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={psPorOficinaData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} />
+                  <Tooltip 
+                    cursor={{ fill: '#f8fafc' }}
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} 
+                  />
+                  <Bar dataKey="value" name="Total PS" fill="#10b981" radius={[4, 4, 0, 0]} barSize={40} />
+                </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
