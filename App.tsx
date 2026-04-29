@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList,
   PieChart, Pie, Cell, Legend, AreaChart, Area
 } from 'recharts';
 import {
@@ -1220,13 +1220,20 @@ const App: React.FC = () => {
         {/* PS por Oficina */}
         <section className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
           <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 h-[350px] md:h-[450px] hover-card">
-            <h3 className="font-bold text-slate-800 mb-6 md:mb-8 flex items-center space-x-2">
-              <BarChart3 size={20} className="text-emerald-500" />
-              <span>PS por Oficina</span>
-            </h3>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 md:mb-8 gap-2">
+              <h3 className="font-bold text-slate-800 flex items-center space-x-2">
+                <BarChart3 size={20} className="text-emerald-500" />
+                <span>PS por Oficina</span>
+              </h3>
+              <div className="bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 flex items-center shadow-sm">
+                <span className="text-[10px] font-black text-emerald-600 tracking-wider">
+                  {filters.status === 'TODOS' ? 'TODOS OS STATUS' : `STATUS: ${filters.status}`}
+                </span>
+              </div>
+            </div>
             <div className="h-[220px] md:h-[320px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={psPorOficinaData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <BarChart data={psPorOficinaData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} />
@@ -1234,7 +1241,9 @@ const App: React.FC = () => {
                     cursor={{ fill: '#f8fafc' }}
                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} 
                   />
-                  <Bar dataKey="value" name="Total PS" fill="#10b981" radius={[4, 4, 0, 0]} barSize={40} />
+                  <Bar dataKey="value" name="Total PS" fill="#10b981" radius={[4, 4, 0, 0]} barSize={40}>
+                    <LabelList dataKey="value" position="top" fill="#64748b" fontSize={11} fontWeight="bold" />
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
