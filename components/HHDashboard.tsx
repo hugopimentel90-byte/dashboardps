@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-    AreaChart, Area, Cell, Legend
+    AreaChart, Area, Cell, Legend, LabelList
 } from 'recharts';
 import {
     TrendingUp, HardHat, Clock, BarChart3,
@@ -680,7 +680,9 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
                                         contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
                                         formatter={(value: number) => [`${value} lançamentos`, 'Volume']}
                                     />
-                                    <Bar dataKey="count" fill="#06b6d4" radius={[4, 4, 0, 0]} barSize={20} />
+                                    <Bar dataKey="count" fill="#06b6d4" radius={[4, 4, 0, 0]} barSize={20}>
+                                        <LabelList dataKey="count" position="top" fill="#64748b" fontSize={10} fontWeight="bold" />
+                                    </Bar>
                                 </BarChart>
                             </ResponsiveContainer>
                         ) : (
