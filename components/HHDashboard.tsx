@@ -17,6 +17,44 @@ interface HHDashboardFilters {
     oficina: string;
 }
 
+const CustomXAxisTick = ({ x, y, payload }: any) => {
+    const text = payload.value || '';
+    const maxLength = 25;
+    
+    const words = text.split(' ');
+    const lines = [];
+    let currentLine = '';
+    
+    words.forEach((word: string) => {
+        if ((currentLine + word).length > maxLength && currentLine.length > 0) {
+            lines.push(currentLine.trim());
+            currentLine = word + ' ';
+        } else {
+            currentLine += word + ' ';
+        }
+    });
+    if (currentLine.trim()) {
+        lines.push(currentLine.trim());
+    }
+
+    const displayLines = lines.slice(0, 3);
+    if (lines.length > 3) {
+        displayLines[2] = displayLines[2] + '...';
+    }
+
+    return (
+        <g transform={`translate(${x},${y})`}>
+            <text x={0} y={0} dy={16} textAnchor="end" fill="#64748b" fontSize={9} transform="rotate(-40)">
+                {displayLines.map((line, index) => (
+                    <tspan x={0} dy={index === 0 ? 0 : 12} key={index}>
+                        {line}
+                    </tspan>
+                ))}
+            </text>
+        </g>
+    );
+};
+
 interface HHDashboardProps {
     data: ApontamentoHH[];
     loading: boolean;
@@ -748,23 +786,21 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
             </div>
 
             {/* Gráfico de Pareto - Tipos de Serviço */}
-            <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-4 md:p-8 h-[400px] md:h-[480px]">
+            <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-4 md:p-8 h-[450px] md:h-[500px]">
                 <h3 className="font-bold text-slate-800 mb-8 flex items-center space-x-2">
                     <BarChart3 size={20} className="text-violet-500" />
                     <span>Tipos de Serviço por HH (Pareto)</span>
                 </h3>
-                <div className="h-[320px] md:h-[380px]">
+                <div className="h-[360px] md:h-[400px]">
                     {metrics.paretoData.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
-                            <ComposedChart data={metrics.paretoData} margin={{ top: 20, right: 20, bottom: 60, left: 20 }}>
+                            <ComposedChart data={metrics.paretoData} margin={{ top: 20, right: 20, bottom: 100, left: 20 }}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                 <XAxis 
                                     dataKey="name" 
                                     axisLine={false} 
                                     tickLine={false} 
-                                    tick={{ fontSize: 10, fill: '#64748b' }}
-                                    angle={-45}
-                                    textAnchor="end"
+                                    tick={<CustomXAxisTick />}
                                     interval={0}
                                 />
                                 <YAxis 
