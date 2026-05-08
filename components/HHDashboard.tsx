@@ -54,13 +54,17 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
     const executeDeleteHH = async (id: string) => {
         if (onDeleteApontamento) {
             setSaveStatus('saving');
-            await onDeleteApontamento(id);
-            setLocalNotification("Apontamento excluído!");
-            setConfirmDeleteId(null);
-            setTimeout(() => {
-                setLocalNotification(null);
+            try {
+                await onDeleteApontamento(id);
+                setLocalNotification("Apontamento excluído!");
+                setConfirmDeleteId(null);
+                setTimeout(() => {
+                    setLocalNotification(null);
+                    setSaveStatus('idle');
+                }, 3000);
+            } catch (err) {
                 setSaveStatus('idle');
-            }, 3000);
+            }
         }
     };
 

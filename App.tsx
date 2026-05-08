@@ -401,18 +401,24 @@ const App: React.FC = () => {
 
   const handleDeleteApontamento = async (id: string) => {
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('apontamento_hh')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .select();
 
       if (error) throw error;
+      
+      if (!data || data.length === 0) {
+        throw new Error("Aviso: O registro não foi apagado no Supabase. Isso geralmente ocorre devido à falta de permissões DELETE no RLS (Row Level Security) da tabela apontamento_hh.");
+      }
       
       setNotification({ message: "Apontamento excluído com sucesso!", type: 'success' });
       await loadHHData();
     } catch (error) {
       console.error("Erro ao excluir apontamento:", error);
-      setNotification({ message: "Erro ao excluir apontamento.", type: 'error' });
+      setNotification({ message: "Erro ao excluir apontamento. Verifique permissões (RLS).", type: 'error' });
+      throw error;
     }
   };
 
