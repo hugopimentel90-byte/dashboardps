@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-    AreaChart, Area, Cell, Legend, LabelList
+    AreaChart, Area, Cell, Legend, LabelList, ComposedChart, Line
 } from 'recharts';
 import {
     TrendingUp, HardHat, Clock, BarChart3,
@@ -140,6 +140,7 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
         let totalMilitares = 0;
         const workshopMap: Record<string, number> = {};
         const temporalMap: Record<string, { hh: number, count: number }> = {};
+        const tipoServicoMap: Record<string, number> = {};
 
         const filteredData = data.filter(item => {
             const matchOficina = filters.oficina === 'TODAS' || item.oficina === filters.oficina;
@@ -168,6 +169,10 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
             if (!temporalMap[dateKey]) temporalMap[dateKey] = { hh: 0, count: 0 };
             temporalMap[dateKey].hh += hh;
             temporalMap[dateKey].count += 1;
+
+            // Por Tipo de Serviço
+            const tipo = item.tipo_servico && item.tipo_servico.trim() !== '' ? item.tipo_servico : 'Não classificado';
+            tipoServicoMap[tipo] = (tipoServicoMap[tipo] || 0) + hh;
         });
 
         const workshopData = Object.entries(workshopMap)
@@ -196,6 +201,22 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
             filterDays = diff > 0 ? diff : 1;
         }
 
+        const tipoServicoArray = Object.entries(tipoServicoMap)
+            .map(([name, value]) => ({ name, value }))
+            .sort((a, b) => b.value - a.value);
+
+        let cumulative = 0;
+        const totalHHTipo = tipoServicoArray.reduce((sum, item) => sum + item.value, 0);
+        
+        const paretoData = tipoServicoArray.map(item => {
+            cumulative += item.value;
+            return {
+                name: item.name,
+                value: Number(item.value.toFixed(1)),
+                paretoPercentage: totalHHTipo > 0 ? Number(((cumulative / totalHHTipo) * 100).toFixed(1)) : 0
+            };
+        });
+
         return {
             totalHH,
             totalMilitares,
@@ -204,6 +225,7 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
             avgHHPorDia: totalHH / filterDays,
             workshopData,
             temporalData,
+            paretoData,
             totalRegistros: filteredData.length,
             filteredData
         };
@@ -691,6 +713,59 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
                             </div>
                         )}
                     </div>
+                </div>
+            </div>
+
+            {/* Gráfico de Pareto - Tipos de Serviço */}
+            <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-4 md:p-8 h-[400px] md:h-[480px]">
+                <h3 className="font-bold text-slate-800 mb-8 flex items-center space-x-2">
+                    <BarChart3 size={20} className="text-violet-500" />
+                    <span>Tipos de Serviço por HH (Pareto)</span>
+                </h3>
+                <div className="h-[320px] md:h-[380px]">
+                    {metrics.paretoData.length > 0 ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                            <ComposedChart data={metrics.paretoData} margin={{ top: 20, right: 20, bottom: 60, left: 20 }}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                <XAxis 
+                                    dataKey="name" 
+                                    axisLine={false} 
+                                    tickLine={false} 
+                                    tick={{ fontSize: 10, fill: '#64748b' }}
+                                    angle={-45}
+                                    textAnchor="end"
+                                    interval={0}
+                                />
+                                <YAxis 
+                                    yAxisId="left" 
+                                    axisLine={false} 
+                                    tickLine={false} 
+                                    tick={{ fontSize: 10, fill: '#64748b' }} 
+                                />
+                                <YAxis 
+                                    yAxisId="right" 
+                                    orientation="right" 
+                                    axisLine={false} 
+                                    tickLine={false} 
+                                    tick={{ fontSize: 10, fill: '#64748b' }}
+                                    tickFormatter={(val) => `${val}%`}
+                                    domain={[0, 100]}
+                                />
+                                <Tooltip
+                                    cursor={{ fill: '#f8fafc' }}
+                                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
+                                />
+                                <Bar yAxisId="left" dataKey="value" fill="#8b5cf6" radius={[4, 4, 0, 0]} barSize={40} name="HH Total">
+                                    <LabelList dataKey="value" position="top" fill="#64748b" fontSize={10} fontWeight="bold" />
+                                </Bar>
+                                <Line yAxisId="right" type="monotone" dataKey="paretoPercentage" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4, fill: '#f59e0b', strokeWidth: 2, stroke: '#fff' }} name="% Acumulada" />
+                            </ComposedChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <div className="h-full flex items-center justify-center text-slate-300 text-sm italic font-medium">
+                            Nenhum tipo de serviço encontrado no filtro selecionado.
+                        </div>
+                    )}
                 </div>
             </div>
 
