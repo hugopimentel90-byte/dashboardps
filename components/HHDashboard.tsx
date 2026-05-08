@@ -187,6 +187,7 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
         const workshopMap: Record<string, number> = {};
         const temporalMap: Record<string, { hh: number, count: number }> = {};
         const tipoServicoMap: Record<string, number> = {};
+        const tipoServicoCountMap: Record<string, number> = {};
 
         const filteredData = data.filter(item => {
             const matchOficina = filters.oficina === 'TODAS' || item.oficina === filters.oficina;
@@ -219,6 +220,7 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
             // Por Tipo de Serviço
             const tipo = item.tipo_servico && item.tipo_servico.trim() !== '' ? item.tipo_servico : 'Não classificado';
             tipoServicoMap[tipo] = (tipoServicoMap[tipo] || 0) + hh;
+            tipoServicoCountMap[tipo] = (tipoServicoCountMap[tipo] || 0) + 1;
         });
 
         const workshopData = Object.entries(workshopMap)
@@ -264,9 +266,11 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
         });
 
         const averageData = tipoServicoArray.map(item => {
+            const count = tipoServicoCountMap[item.name] || 1;
             return {
                 name: item.name,
-                avgHH: Number((item.value / filterDays).toFixed(1))
+                avgHH: Number((item.value / count).toFixed(1)),
+                count: count
             };
         }).sort((a, b) => b.avgHH - a.avgHH);
 
@@ -870,7 +874,7 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
                                 <Tooltip
                                     cursor={{ fill: '#f8fafc' }}
                                     contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
-                                    formatter={(value: number) => [`${value.toFixed(1)} HH/dia`, 'Média Diária']}
+                                    formatter={(value: number, name: string, props: any) => [`${value.toFixed(1)} HH/ativ. (${props.payload.count} ativ.)`, 'Média HH']}
                                 />
                                 <Bar dataKey="avgHH" fill="#ec4899" radius={[4, 4, 0, 0]} barSize={40} name="Média HH">
                                     <LabelList dataKey="avgHH" position="top" fill="#64748b" fontSize={10} fontWeight="bold" />
