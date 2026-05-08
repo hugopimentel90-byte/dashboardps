@@ -263,6 +263,13 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
             };
         });
 
+        const averageData = tipoServicoArray.map(item => {
+            return {
+                name: item.name,
+                avgHH: Number((item.value / filterDays).toFixed(1))
+            };
+        }).sort((a, b) => b.avgHH - a.avgHH);
+
         return {
             totalHH,
             totalMilitares,
@@ -272,6 +279,7 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
             workshopData,
             temporalData,
             paretoData,
+            averageData,
             totalRegistros: filteredData.length,
             filteredData
         };
@@ -827,6 +835,47 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
                                 </Bar>
                                 <Line yAxisId="right" type="monotone" dataKey="paretoPercentage" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4, fill: '#f59e0b', strokeWidth: 2, stroke: '#fff' }} name="% Acumulada" />
                             </ComposedChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <div className="h-full flex items-center justify-center text-slate-300 text-sm italic font-medium">
+                            Nenhum tipo de serviço encontrado no filtro selecionado.
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Média Diária por Tipo de Serviço */}
+            <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-4 md:p-8 h-[450px] md:h-[500px]">
+                <h3 className="font-bold text-slate-800 mb-8 flex items-center space-x-2">
+                    <Clock size={20} className="text-pink-500" />
+                    <span>Média Diária de HH por Tipo de Serviço</span>
+                </h3>
+                <div className="h-[360px] md:h-[400px]">
+                    {metrics.averageData.length > 0 ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={metrics.averageData} margin={{ top: 20, right: 20, bottom: 100, left: 20 }}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                <XAxis 
+                                    dataKey="name" 
+                                    axisLine={false} 
+                                    tickLine={false} 
+                                    tick={<CustomXAxisTick />}
+                                    interval={0}
+                                />
+                                <YAxis 
+                                    axisLine={false} 
+                                    tickLine={false} 
+                                    tick={{ fontSize: 10, fill: '#64748b' }} 
+                                />
+                                <Tooltip
+                                    cursor={{ fill: '#f8fafc' }}
+                                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
+                                    formatter={(value: number) => [`${value.toFixed(1)} HH/dia`, 'Média Diária']}
+                                />
+                                <Bar dataKey="avgHH" fill="#ec4899" radius={[4, 4, 0, 0]} barSize={40} name="Média HH">
+                                    <LabelList dataKey="avgHH" position="top" fill="#64748b" fontSize={10} fontWeight="bold" />
+                                </Bar>
+                            </BarChart>
                         </ResponsiveContainer>
                     ) : (
                         <div className="h-full flex items-center justify-center text-slate-300 text-sm italic font-medium">
