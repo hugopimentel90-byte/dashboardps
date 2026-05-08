@@ -381,17 +381,10 @@ const App: React.FC = () => {
 
   const handleSaveApontamento = async (apontamento: ApontamentoHH) => {
     try {
-      // Como a coluna 'tipo_servico' não existe no banco, concatenamos para não perder a informação e evitar erro de SQL
-      const { tipo_servico, ...apontamentoDb } = apontamento;
-      const servicoFinal = tipo_servico 
-        ? `[${tipo_servico.toUpperCase()}] ${apontamentoDb.servico}`
-        : apontamentoDb.servico;
-
       const { error } = await supabase
         .from('apontamento_hh')
         .insert([{
-          ...apontamentoDb,
-          servico: servicoFinal,
+          ...apontamento,
           created_at: new Date().toISOString()
         }]);
 
@@ -427,21 +420,11 @@ const App: React.FC = () => {
     try {
       if (!apontamento.id) throw new Error("ID não fornecido");
       
-      // Preserva a lógica de salvar com o tipo_servico no texto para não quebrar o schema
-      const { tipo_servico, ...apontamentoDb } = apontamento;
-      let servicoFinal = apontamentoDb.servico;
-      
-      // Só concatena se o tipo_servico já não estiver no texto e houver um tipo
-      if (tipo_servico && !servicoFinal.includes(`[${tipo_servico.toUpperCase()}]`)) {
-          servicoFinal = `[${tipo_servico.toUpperCase()}] ${apontamentoDb.servico}`;
-      }
+      const { id, ...updateData } = apontamento;
 
       const { error } = await supabase
         .from('apontamento_hh')
-        .update({
-          ...apontamentoDb,
-          servico: servicoFinal
-        })
+        .update(updateData)
         .eq('id', apontamento.id);
 
       if (error) throw error;
