@@ -848,7 +848,7 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
             <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-4 md:p-8 h-[450px] md:h-[500px]">
                 <h3 className="font-bold text-slate-800 mb-8 flex items-center space-x-2">
                     <Clock size={20} className="text-pink-500" />
-                    <span>Média Diária de HH por Tipo de Serviço</span>
+                    <span>Média de HH por Tipo de Serviço</span>
                 </h3>
                 <div className="h-[360px] md:h-[400px]">
                     {metrics.averageData.length > 0 ? (
