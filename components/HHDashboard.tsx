@@ -45,18 +45,22 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
     // --- Tabs & Edit HH ---
     const [activeTab, setActiveTab] = useState<'servicos' | 'apontamentos'>('servicos');
     const [editingHH, setEditingHH] = useState<ApontamentoHH | null>(null);
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
     const apontamentosOficina = useMemo(() => {
         return data.filter(d => d.oficina === configOficina).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
     }, [data, configOficina]);
 
-    const handleConfirmDeleteHH = async (id: string) => {
-        if (window.confirm("Deseja realmente excluir este apontamento?")) {
-            if (onDeleteApontamento) {
-                await onDeleteApontamento(id);
-                setLocalNotification("Apontamento excluído!");
-                setTimeout(() => setLocalNotification(null), 3000);
-            }
+    const executeDeleteHH = async (id: string) => {
+        if (onDeleteApontamento) {
+            setSaveStatus('saving');
+            await onDeleteApontamento(id);
+            setLocalNotification("Apontamento excluído!");
+            setConfirmDeleteId(null);
+            setTimeout(() => {
+                setLocalNotification(null);
+                setSaveStatus('idle');
+            }, 3000);
         }
     };
 
@@ -447,30 +451,53 @@ const HHDashboard: React.FC<HHDashboardProps> = ({ data, loading, oficinas, onBa
                                             ) : (
                                                 apontamentosOficina.map(ap => (
                                                     <div key={ap.id} className="p-4 flex justify-between items-start hover:bg-slate-50 transition-colors group">
-                                                        <div className="flex-1 min-w-0 pr-4">
-                                                            <div className="flex items-center space-x-2 mb-1">
-                                                                <span className="text-[10px] font-black bg-slate-100 text-slate-500 px-2 py-0.5 rounded uppercase">{new Date(ap.data + 'T12:00:00').toLocaleDateString('pt-BR')}</span>
-                                                                <span className="text-[10px] font-black text-indigo-500">{ap.inicio} às {ap.fim}</span>
-                                                                <span className="text-[10px] font-bold text-slate-400">({ap.qtd_militares} militar{ap.qtd_militares > 1 ? 'es' : ''})</span>
+                                                        {confirmDeleteId === ap.id ? (
+                                                            <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between bg-red-50 p-3 rounded-lg border border-red-100 animate-in fade-in zoom-in duration-200">
+                                                                <div className="flex items-center space-x-2 mb-2 sm:mb-0">
+                                                                    <Trash2 size={16} className="text-red-500" />
+                                                                    <span className="text-sm font-bold text-red-700">Excluir apontamento?</span>
+                                                                </div>
+                                                                <div className="flex items-center space-x-2">
+                                                                    <button onClick={() => setConfirmDeleteId(null)} className="flex-1 sm:flex-none px-3 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-200 hover:text-slate-700 rounded-md transition-colors">Cancelar</button>
+                                                                    <button onClick={() => ap.id && executeDeleteHH(ap.id)} disabled={saveStatus === 'saving'} className="flex-1 sm:flex-none flex items-center justify-center space-x-1 px-3 py-1.5 text-xs font-bold bg-red-600 text-white hover:bg-red-700 rounded-md transition-colors disabled:opacity-50">
+                                                                        {saveStatus === 'saving' ? <Loader2 size={12} className="animate-spin" /> : null}
+                                                                        <span>Excluir</span>
+                                                                    </button>
+                                                                </div>
                                                             </div>
-                                                            <p className="text-sm font-bold text-slate-700 truncate">{ap.servico}</p>
-                                                        </div>
-                                                        <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                                                            <button
-                                                                onClick={() => setEditingHH(ap)}
-                                                                className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                                                                title="Editar"
-                                                            >
-                                                                <Edit2 size={16} />
-                                                            </button>
-                                                            <button
-                                                                onClick={() => ap.id && handleConfirmDeleteHH(ap.id)}
-                                                                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                                                title="Excluir"
-                                                            >
-                                                                <Trash2 size={16} />
-                                                            </button>
-                                                        </div>
+                                                        ) : (
+                                                            <>
+                                                                <div className="flex-1 min-w-0 pr-4">
+                                                                    <div className="flex items-center space-x-2 mb-1">
+                                                                        <span className="text-[10px] font-black bg-slate-100 text-slate-500 px-2 py-0.5 rounded uppercase">{new Date(ap.data + 'T12:00:00').toLocaleDateString('pt-BR')}</span>
+                                                                        <span className="text-[10px] font-black text-indigo-500">{ap.inicio} às {ap.fim}</span>
+                                                                        <span className="text-[10px] font-bold text-slate-400">({ap.qtd_militares} militar{ap.qtd_militares > 1 ? 'es' : ''})</span>
+                                                                    </div>
+                                                                    <p className="text-sm font-bold text-slate-700 truncate">{ap.servico}</p>
+                                                                    {ap.tipo_servico && (
+                                                                        <span className="inline-block mt-1 bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase">
+                                                                            {ap.tipo_servico}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                                                                    <button
+                                                                        onClick={() => setEditingHH(ap)}
+                                                                        className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                                                        title="Editar"
+                                                                    >
+                                                                        <Edit2 size={16} />
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => setConfirmDeleteId(ap.id as string)}
+                                                                        className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                                        title="Excluir"
+                                                                    >
+                                                                        <Trash2 size={16} />
+                                                                    </button>
+                                                                </div>
+                                                            </>
+                                                        )}
                                                     </div>
                                                 ))
                                             )}
