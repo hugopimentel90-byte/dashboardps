@@ -3,6 +3,9 @@ import { supabase } from './supabase';
 const LOCAL_STORAGE_KEY = '@bfla_oficina_servicos';
 
 export const loadServicosOficina = async (oficina: string): Promise<string[]> => {
+    let loadedFromSupabase = false;
+    let servicosSupabase: string[] = [];
+
     // 1. Tentar carregar do Supabase
     try {
         const { data, error } = await supabase
@@ -12,18 +15,39 @@ export const loadServicosOficina = async (oficina: string): Promise<string[]> =>
             .single();
 
         if (data && !error && data.servicos) {
-            return data.servicos;
+            loadedFromSupabase = true;
+            servicosSupabase = data.servicos;
+            
+            // Backup no localStorage
+            try {
+                const localData = localStorage.getItem(LOCAL_STORAGE_KEY);
+                const parsed = localData ? JSON.parse(localData) : {};
+                parsed[oficina] = servicosSupabase;
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(parsed));
+            } catch (e) {
+                console.error("Erro ao fazer backup no localStorage", e);
+            }
+            return servicosSupabase;
         }
     } catch (err) {
         // Ignorar erro silenciosamente para usar o fallback
+        console.error("Erro ao carregar do Supabase", err);
     }
 
-    // 2. Fallback para LocalStorage (caso a tabela não exista no Supabase)
+    // 2. Fallback para LocalStorage
     try {
         const localData = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (localData) {
             const parsed = JSON.parse(localData);
-            return parsed[oficina] || [];
+            const servicosLocal = parsed[oficina] || [];
+            
+            // Se carregou do localStorage e não veio do Supabase, tenta sincronizar para o Supabase
+            if (!loadedFromSupabase && servicosLocal.length > 0) {
+                 console.log("Sincronizando serviços do LocalStorage para o Supabase...");
+                 saveServicosOficina(oficina, servicosLocal).catch(console.error);
+            }
+
+            return servicosLocal;
         }
     } catch (e) {
         console.error("Erro ao ler localStorage", e);
